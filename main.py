@@ -1,5 +1,7 @@
 import time
 from machine import *
+from " " import interrupts
+import sys
 
 led1 = machine.Pin(0, machine.Pin.OUT)
 led2 = machine.Pin(1, machine.Pin.OUT)
@@ -148,8 +150,7 @@ def interruptOne(pin):
             
         instructionHandler()
     switch1.irq(handler = interruptOne)
-
-    
+        
 switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne)
 # switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
 # switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
