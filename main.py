@@ -1,9 +1,8 @@
 import time
 from machine import Pin
-
-import sys
-sys.path.append('/modules')
-# from modules import interrupts
+from memory import Memory
+from instruction import Instruction
+from modeStatus import printModeStatus
 
 led1 = machine.Pin(0, machine.Pin.OUT)
 led2 = machine.Pin(1, machine.Pin.OUT)
@@ -43,18 +42,16 @@ programRegister = {
                     5 : []
                     }
 
-memoryRegister = []
+memoryRegister = Memory()
 writeLocationAddressRegister = ""
-instructionRegister = []
+instructionRegister = Instruction()
 
 ########################################### Starup
 
 #startup
 mode = "Program"
 
-def printModeStatus():
-    print("------------------------------------")
-    print(mode + " Mode")
+printModeStatus(mode)
 
 ############################################
 
