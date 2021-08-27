@@ -1,7 +1,9 @@
 import time
-from machine import *
-from " " import interrupts
+from machine import Pin
+
 import sys
+sys.path.append('/modules')
+# from modules import interrupts
 
 led1 = machine.Pin(0, machine.Pin.OUT)
 led2 = machine.Pin(1, machine.Pin.OUT)
@@ -150,9 +152,34 @@ def interruptOne(pin):
             
         instructionHandler()
     switch1.irq(handler = interruptOne)
+    
+def interruptTwo(pin):
+    
+    instructionValue = 2
+    
+    switch2.irq(handler = None)
+    time.sleep(buttonPad)
+    
+    if pin.value() == 2:
+        global instructionRegister
+        global lastProgramUsed
+        
+        if mode == "Program":
+            lastProgramUsed = instructionValue
+            memoryRegister.clear()
+            loadProgramToMemory(instructionValue) #refactor to loadToMemory
+            loadMemoryToInstructionRegister() #refactor to: instructionRegister = memoryRegister
+            
+        else: #if mode == "Manual"
+            instructionRegister.append(instructionValue)
+            if mode == "Write":
+                writeLocationAddressRegister = instructionValue
+            
+        instructionHandler()
+    switch2.irq(handler = interruptTwo)
         
 switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne)
-# switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
+switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
 # switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
 # switch4.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFour)
 # switch5.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFive)
