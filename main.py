@@ -42,7 +42,7 @@ programRegister = {
                     }
 
 memoryRegister = []
-
+writeLocationAddressRegister = ""
 instructionRegister = []
 
 def loadParameterToMemory(switchNumber):
@@ -50,6 +50,11 @@ def loadParameterToMemory(switchNumber):
         memoryRegister.append(switchNumber)
     else:
         memoryRegister.remove(switchNumber)
+        
+def writeToProgramRegister(location):
+    programRegster[location] = memoryRegister
+    global lastProgramUsed
+    lastProgramUsed = location
 
 def loadProgramToInstructionRegister(patch):
     program = programRegister[patch]
@@ -68,14 +73,11 @@ def interruptWrite(pin):
             mode = "Write"
             print(mode + " Mode")
         
-        if mode == "Write": #change 1-5 handlers to save to a location from A to E in ProgramRegister
-              switch1.irq(handler = writeToProgramRegister(memoryRegister))
-              switch2.irq(handler = writeToProgramRegister(memoryRegister))
-              switch3.irq(handler = writeToProgramRegister(memoryRegister))
-              switch4.irq(handler = writeToProgramRegister(memoryRegister))
-              switch5.irq(handler = writeToProgramRegister(memoryRegister))
-              
-    
+        if mode == "Write":
+            writeToProgramRegister(writeLocationAddressRegister)
+            mode == "Program"
+            
+            
     writeSwitch.irq(handler = interruptWrite)
     
 def interruptMode(pin):
@@ -104,6 +106,10 @@ def interruptMode(pin):
     modeSwitch.irq(handler = interruptMode)
 
 def interruptOne(pin):
+    
+    writeLocationKey = "A"
+    instructionValue = 1
+    
     switch1.irq(handler = None)
     time.sleep(buttonPad)
     
@@ -111,95 +117,25 @@ def interruptOne(pin):
         global instructionRegister
         
         if mode == "Program":
-            loadProgramToInstructionRegister("A")
+            loadProgramToInstructionRegister()
             global lastProgramUsed
-            lastProgramUsed = "A"
+            lastProgramUsed = programValue
             
         else:
-            instructionRegister.append(1)
+            instructionRegister.append(instructionValue)
+            loadParameterToMemory(instructionValue)
             if mode == "Write":
-                loadParameterToMemory(1)
+                writeLocationAddressRegister = writeLocationKey
             
         instructionHandler()
     switch1.irq(handler = interruptOne)
 
-def interruptTwo(pin):
-    switch2.irq(handler = None)
-    time.sleep(buttonPad)
-    
-    if pin.value() == 1:
-        global instructionRegister
-        
-        if mode == "Program":
-            loadProgramToInstructionRegister("B")
-            global lastProgramUsed
-            lastProgramUsed = "B"
-            
-        elif mode == "Manual":
-            instructionRegister.append(2)
-            
-        instructionHandler()
-    switch2.irq(handler = interruptTwo)
-
-def interruptThree(pin):
-    switch3.irq(handler = None)
-    time.sleep(buttonPad)
-    
-    if pin.value() == 1:
-        global instructionRegister
-        
-        if mode == "Program":
-            loadProgramToInstructionRegister("C")
-            global lastProgramUsed
-            lastProgramUsed = "C"
-            
-        elif mode == "Manual":
-            instructionRegister.append(3)
-            
-        instructionHandler()
-    switch3.irq(handler = interruptThree)
-
-def interruptFour(pin):
-    switch4.irq(handler = None)
-    time.sleep(buttonPad)
-    
-    if pin.value() == 1:
-        global instructionRegister
-        
-        if mode == "Program":
-            loadProgramToInstructionRegister("D")
-            global lastProgramUsed
-            lastProgramUsed = "D"
-            
-        elif mode == "Manual":
-            instructionRegister.append(4)
-            
-        instructionHandler()
-    switch4.irq(handler = interruptFour)
-        
-def interruptFive(pin):
-    switch5.irq(handler = None)
-    time.sleep(buttonPad)
-    
-    if pin.value() == 1:
-        global instructionRegister
-        
-        if mode == "Program":
-            loadProgramToInstructionRegister("E")
-            global lastProgramUsed
-            lastProgramUsed = "E"
-            
-        else:
-            instructionRegister.append(5)
-            
-        instructionHandler()
-    switch5.irq(handler = interruptFive)
     
 switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne)
-switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
-switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
-switch4.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFour)
-switch5.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFive)
+# switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
+# switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
+# switch4.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFour)
+# switch5.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFive)
 
 modeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptMode)
 writeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)
@@ -228,7 +164,3 @@ def instructionHandler():
             led5.toggle()
                 
     instructionRegister.clear()
-    print(instructionRegister)
-            
-
-            
