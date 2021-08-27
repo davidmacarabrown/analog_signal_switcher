@@ -9,7 +9,6 @@ led5 = machine.Pin(4, machine.Pin.OUT)
 
 writeLed = machine.Pin(5, machine.Pin.OUT)
 
-
 switch1 = machine.Pin(20, machine.Pin.IN, Pin.PULL_DOWN)
 switch2 = machine.Pin(19, machine.Pin.IN, Pin.PULL_DOWN)
 switch3 = machine.Pin(18, machine.Pin.IN, Pin.PULL_DOWN)
@@ -67,7 +66,15 @@ def interruptWrite(pin):
         writeLed.toggle()
         if mode == "Program" or "Manual":
             mode = "Write"
-            print(mode + " Mode")    
+            print(mode + " Mode")
+        
+        if mode == "Write": #change 1-5 handlers to save to a location from A to E in ProgramRegister
+              switch1.irq(handler = writeToProgramRegister(memoryRegister))
+              switch2.irq(handler = writeToProgramRegister(memoryRegister))
+              switch3.irq(handler = writeToProgramRegister(memoryRegister))
+              switch4.irq(handler = writeToProgramRegister(memoryRegister))
+              switch5.irq(handler = writeToProgramRegister(memoryRegister))
+              
     
     writeSwitch.irq(handler = interruptWrite)
     
@@ -188,8 +195,6 @@ def interruptFive(pin):
         instructionHandler()
     switch5.irq(handler = interruptFive)
     
-
-
 switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne)
 switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
 switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
