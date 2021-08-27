@@ -17,21 +17,33 @@ modeSwitch = machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
 
 ledList = [led1, led2, led3, led4, led5]
 
+buttonPad = 0.1
+
 mode = False
     
-def resetLeds():
+def resetOutputs():
     for leds in ledList:
         leds.value(0)
 
-resetLeds()
+resetOutputs()
 
+lastProgramUsed = "A"
 
-programRegister = [1, 3, 5] #placeholder program
+programRegister = {
+                    "A" : [1, 3, 5],
+                    "B" : [1, 2, 3],
+                    "C" : [4, 5],
+                    "D" : [1, 2],
+                    "E" : [5]
+                    }
+
 instructionRegister = []
 
-def loadProgramToInstructionRegister():
-    for parameter in programRegister:
+def loadProgramToInstructionRegister(patch):
+    program = programRegister[patch]
+    for parameter in program:
         instructionRegister.append(parameter)
+    
 
 def interruptMode(pin):
     global mode
@@ -39,8 +51,7 @@ def interruptMode(pin):
     global programRegister
     
     modeSwitch.irq(handler = None)
-    time.sleep(0.06)
-    modeSwitch.irq(handler = interruptMode) #disabling interrupts needs refactored?
+    time.sleep(buttonPad)
     
     if pin.value() == 1:
         print(pin)
@@ -49,71 +60,101 @@ def interruptMode(pin):
         elif mode == True:
             mode = not mode
         modeStatus = ""
+        
         if mode == True:
             modeStatus = "Program"
-            loadProgramToInstructionRegister()
+            instructionRegister.clear()
+            loadProgramToInstructionRegister(lastProgramUsed) #later change to last used program
+            
         elif mode == False:
             modeStatus = "Manual"
+            instructionRegister.clear()
+            resetOutputs()
         print("Mode: " + modeStatus)
         instructionHandler()
+    modeSwitch.irq(handler = interruptMode)
 
 def interruptOne(pin):
     switch1.irq(handler = None)
-    time.sleep(0.06)
-    switch1.irq(handler = interruptOne)
+    time.sleep(buttonPad)
     
     if pin.value() == 1:
-        interruptPin = pin
-        print(pin)
         global instructionRegister
-        instructionRegister.append(1)
+        
+        if mode == True:
+            loadProgramToInstructionRegister("A")
+            
+        else:
+            instructionRegister.append(1)
         instructionHandler()
-        print("Input 1")
-    
+    switch1.irq(handler = interruptOne)
+
 def interruptTwo(pin):
     switch2.irq(handler = None)
-    time.sleep(0.06)
-    switch2.irq(handler = interruptTwo)
+    time.sleep(buttonPad)
     
     if pin.value() == 1:
         global instructionRegister
-        instructionRegister.append(2)
+        
+        if mode == True:
+            loadProgramToInstructionRegister("B")
+            
+        else:
+            instructionRegister.append(2)
+            
         instructionHandler()
-        print("Input 2")
-    
+    switch2.irq(handler = interruptTwo)
+
 def interruptThree(pin):
     switch3.irq(handler = None)
-    time.sleep(0.06)
-    switch3.irq(handler = interruptThree)
+    time.sleep(buttonPad)
     
     if pin.value() == 1:
         global instructionRegister
-        instructionRegister.append(3)
+        
+        if mode == True:
+            loadProgramToInstructionRegister("C")
+            
+        else:
+            instructionRegister.append(3)
+            
         instructionHandler()
-        print("Input 3")
-    
+    switch3.irq(handler = interruptThree)
+
 def interruptFour(pin):
     switch4.irq(handler = None)
-    time.sleep(0.06)
-    switch4.irq(handler = interruptFour)
+    time.sleep(buttonPad)
     
     if pin.value() == 1:
         global instructionRegister
-        instructionRegister.append(4)
+        
+        if mode == True:
+            loadProgramToInstructionRegister("D")
+            
+        else:
+            instructionRegister.append(4)
+            
         instructionHandler()
-        print("Input 4")
-    
+    switch4.irq(handler = interruptFour)
+        
 def interruptFive(pin):
     switch5.irq(handler = None)
-    time.sleep(0.06)
-    switch5.irq(handler = interruptFive)
+    time.sleep(buttonPad)
     
     if pin.value() == 1:
         global instructionRegister
-        instructionRegister.append(5)
+        
+        if mode == True:
+            loadProgramToInstructionRegister("E")
+            
+        else:
+            instructionRegister.append(5)
+            
         instructionHandler()
-        print("Input 5")
+    switch5.irq(handler = interruptFive)
     
+
+
 switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne)
 switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
 switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
@@ -123,50 +164,30 @@ switch5.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFive)
 modeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptMode)
 
 def instructionHandler():
+    print("Queued Instructions: ", instructionRegister)
     
-    for instruction in instructionRegister:
-                
+    if mode == True:
+        resetOutputs()
+            
+    for instruction in instructionRegister:            
+        
         if instruction == 1:
-            if mode == True:
-                led1.toggle()
-                time.sleep(0.1)
-                led1.toggle()
-            else:
-                led1.toggle()
-            
-        if instruction == 2:
-            if mode == True:
-                led2.toggle()
-                time.sleep(0.1)
-                led2.toggle()
-            else:
-                led2.toggle()
-        
-        if instruction == 3:
-            if mode == True:
-                led3.toggle()
-                time.sleep(0.1)
-                led3.toggle()
-            else:
-                led3.toggle()
-        
-        if instruction == 4:
-            if mode == True:
-                led4.toggle()
-                time.sleep(0.1)
-                led4.toggle()
-            else:
-                led4.toggle()
+            led1.toggle()
+                
+        elif instruction == 2:
+            led2.toggle()
+                
+        elif instruction == 3:
+            led3.toggle()
+                
+        elif instruction == 4:
+            led4.toggle()           
 
-        if instruction == 5:
-            if mode == True:
-                led5.toggle()
-                time.sleep(0.1)
-                led5.toggle()
-            else:
-                led5.toggle()
-            
+        elif instruction == 5:
+            led5.toggle()
+                
     instructionRegister.clear()
+    print(instructionRegister)
             
 
             
