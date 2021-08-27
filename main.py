@@ -29,6 +29,8 @@ def resetOutputs():
     for leds in ledList:
         leds.value(0)
 
+########################################## Registers
+
 resetOutputs()
 
 lastProgramUsed = "A"
@@ -44,6 +46,8 @@ programRegister = {
 memoryRegister = []
 writeLocationAddressRegister = ""
 instructionRegister = []
+
+###########################################
 
 def loadParameterToMemory(switchNumber):
     if memoryRegister.count(switchNumber) == 0:
@@ -89,15 +93,20 @@ def interruptMode(pin):
     time.sleep(buttonPad)
     
     if pin.value() == 1:
-        print(pin)
         if mode == "Manual":
             mode = "Program"
-        elif mode == "Program":
-            mode = "Manual"
-        
-        if mode == "Program":
             instructionRegister.clear()
             loadProgramToInstructionRegister(lastProgramUsed) #later change to last used program
+            global memoryRegister
+            memoryRegister = instructionRegister
+            
+        elif mode == "Program":
+            mode = "Manual"
+    
+            instructionRegister.clear()
+            loadProgramToInstructionRegister(lastProgramUsed) #later change to last used program
+            global memoryRegister
+            memoryRegister = instructionRegister
             
         elif mode == "Manual":
             instructionRegister.clear()
@@ -117,9 +126,11 @@ def interruptOne(pin):
         global instructionRegister
         
         if mode == "Program":
-            loadProgramToInstructionRegister()
+            loadProgramToInstructionRegister(writeLocationKey)
             global lastProgramUsed
-            lastProgramUsed = programValue
+            lastProgramUsed = writeLocationKey
+            global memoryRegister
+            memoryRegister = instructionRegister
             
         else:
             instructionRegister.append(instructionValue)
@@ -142,6 +153,7 @@ writeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)
 
 def instructionHandler():
     print("Queued Instructions: ", instructionRegister)
+    print("Memory Register: ", memoryRegister)
     
     if mode == "Program":
         resetOutputs()
