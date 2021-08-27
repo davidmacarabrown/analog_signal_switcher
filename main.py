@@ -46,6 +46,12 @@ memoryRegister = []
 
 instructionRegister = []
 
+def loadParameterToMemory(switchNumber):
+    if memoryRegister.index(switchNumber):
+        pass
+    else:
+        memoryRegister.append(switchNumber)
+
 def loadProgramToInstructionRegister(patch):
     program = programRegister[patch]
     for parameter in program:
@@ -54,15 +60,14 @@ def loadProgramToInstructionRegister(patch):
 def interruptWrite(pin):
     global mode
     writeSwitch.irq(handler = None)
+    
     time.sleep(writeEnableTime)
     
     if pin.value() == 1:
         writeLed.toggle()
         if mode == "Program" or "Manual":
             mode = "write"
-            print(mode + " Mode")
-        else:
-            mode = "program"
+            print(mode + " Mode")    
     
     writeSwitch.irq(handler = interruptWrite)
     
@@ -100,6 +105,8 @@ def interruptOne(pin):
         
         if mode == "Program":
             loadProgramToInstructionRegister("A")
+            global lastProgramUsed
+            lastProgramUsed = "A"
             
         else:
             instructionRegister.append(1)
@@ -115,6 +122,8 @@ def interruptTwo(pin):
         
         if mode == "Program":
             loadProgramToInstructionRegister("B")
+            global lastProgramUsed
+            lastProgramUsed = "B"
             
         elif mode == "Manual":
             instructionRegister.append(2)
@@ -131,6 +140,8 @@ def interruptThree(pin):
         
         if mode == "Program":
             loadProgramToInstructionRegister("C")
+            global lastProgramUsed
+            lastProgramUsed = "C"
             
         elif mode == "Manual":
             instructionRegister.append(3)
@@ -147,6 +158,8 @@ def interruptFour(pin):
         
         if mode == "Program":
             loadProgramToInstructionRegister("D")
+            global lastProgramUsed
+            lastProgramUsed = "D"
             
         elif mode == "Manual":
             instructionRegister.append(4)
@@ -161,8 +174,10 @@ def interruptFive(pin):
     if pin.value() == 1:
         global instructionRegister
         
-        if mode == True:
+        if mode == "Program":
             loadProgramToInstructionRegister("E")
+            global lastProgramUsed
+            lastProgramUsed = "E"
             
         else:
             instructionRegister.append(5)
@@ -184,7 +199,7 @@ writeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)
 def instructionHandler():
     print("Queued Instructions: ", instructionRegister)
     
-    if mode == True:
+    if mode == "Program":
         resetOutputs()
             
     for instruction in instructionRegister:            
