@@ -22,10 +22,9 @@ writeSwitch = machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN)
 ledList = [led1, led2, led3, led4, led5, writeLed]
 
 buttonPad = 0.1
-writeEnableTime = 5
+writeEnableTime = 2.5
 
-mode = False
-writeMode = False
+mode = "Manual"
     
 def resetOutputs():
     for leds in ledList:
@@ -53,16 +52,19 @@ def loadProgramToInstructionRegister(patch):
         instructionRegister.append(parameter)
     
 def interruptWrite(pin):
-    global writeMode
+    global mode
     writeSwitch.irq(handler = None)
     time.sleep(writeEnableTime)
     
     if pin.value() == 1:
         writeLed.toggle()
-        writeMode = not writeMode
+        if mode == "Program" or "Manual":
+            mode = "write"
+            print(mode + " Mode")
+        else:
+            mode = "program"
     
     writeSwitch.irq(handler = interruptWrite)
-    print("Write Mode: ", writeMode)
     
 def interruptMode(pin):
     global mode
@@ -74,22 +76,18 @@ def interruptMode(pin):
     
     if pin.value() == 1:
         print(pin)
-        if mode == False:
-            mode = not mode
-        elif mode == True:
-            mode = not mode
-        modeStatus = ""
+        if mode == "Manual":
+            mode = "Program"
+        elif mode == "Program":
+            mode = "Manual"
         
-        if mode == True:
-            modeStatus = "Program"
+        if mode == "Program":
             instructionRegister.clear()
             loadProgramToInstructionRegister(lastProgramUsed) #later change to last used program
             
-        elif mode == False:
-            modeStatus = "Manual"
+        elif mode == "Manual":
             instructionRegister.clear()
-            resetOutputs()
-        print("Mode: " + modeStatus)
+        print(mode + " Mode")
         instructionHandler()
     modeSwitch.irq(handler = interruptMode)
 
@@ -100,7 +98,7 @@ def interruptOne(pin):
     if pin.value() == 1:
         global instructionRegister
         
-        if mode == True:
+        if mode == "Program":
             loadProgramToInstructionRegister("A")
             
         else:
@@ -115,10 +113,10 @@ def interruptTwo(pin):
     if pin.value() == 1:
         global instructionRegister
         
-        if mode == True:
+        if mode == "Program":
             loadProgramToInstructionRegister("B")
             
-        else:
+        elif mode == "Manual":
             instructionRegister.append(2)
             
         instructionHandler()
@@ -131,10 +129,10 @@ def interruptThree(pin):
     if pin.value() == 1:
         global instructionRegister
         
-        if mode == True:
+        if mode == "Program":
             loadProgramToInstructionRegister("C")
             
-        else:
+        elif mode == "Manual":
             instructionRegister.append(3)
             
         instructionHandler()
@@ -147,10 +145,10 @@ def interruptFour(pin):
     if pin.value() == 1:
         global instructionRegister
         
-        if mode == True:
+        if mode == "Program":
             loadProgramToInstructionRegister("D")
             
-        else:
+        elif mode == "Manual":
             instructionRegister.append(4)
             
         instructionHandler()
