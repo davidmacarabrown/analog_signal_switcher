@@ -47,10 +47,10 @@ memoryRegister = []
 instructionRegister = []
 
 def loadParameterToMemory(switchNumber):
-    if memoryRegister.index(switchNumber):
-        pass
-    else:
+    if memoryRegister.count(switchNumber) == 0:
         memoryRegister.append(switchNumber)
+    else:
+        memoryRegister.remove(switchNumber)
 
 def loadProgramToInstructionRegister(patch):
     program = programRegister[patch]
@@ -66,7 +66,7 @@ def interruptWrite(pin):
     if pin.value() == 1:
         writeLed.toggle()
         if mode == "Program" or "Manual":
-            mode = "write"
+            mode = "Write"
             print(mode + " Mode")    
     
     writeSwitch.irq(handler = interruptWrite)
@@ -110,6 +110,9 @@ def interruptOne(pin):
             
         else:
             instructionRegister.append(1)
+            if mode == "Write":
+                loadParameterToMemory(1)
+            
         instructionHandler()
     switch1.irq(handler = interruptOne)
 
