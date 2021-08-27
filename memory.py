@@ -17,4 +17,6 @@ class Memory:
         self.clearAll()
         for inst in instructionList:
             self.contents.append(inst)
+        
+        
 
