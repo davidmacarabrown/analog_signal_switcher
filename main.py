@@ -23,31 +23,36 @@ ledList = [led1, led2, led3, led4, led5, writeLed]
 buttonPad = 0.1
 writeEnableTime = 2.5
 
-mode = "Manual"
-    
 def resetOutputs():
     for leds in ledList:
         leds.value(0)
 
 ########################################## Registers
 
-resetOutputs()
-
-lastProgramUsed = "A"
+lastProgramUsed = 1
 
 programRegister = {
-                    "A" : [1, 3, 5],
-                    "B" : [1, 2, 3],
-                    "C" : [4, 5],
-                    "D" : [1, 2],
-                    "E" : []
+                    1 : [1, 3, 5],
+                    2 : [1, 2, 3],
+                    3 : [4, 5],
+                    4 : [1, 2],
+                    5 : []
                     }
 
 memoryRegister = []
 writeLocationAddressRegister = ""
 instructionRegister = []
 
-###########################################
+########################################### Starup
+
+#startup
+mode = "Program"
+
+def printModeStatus():
+    print("------------------------------------")
+    print(mode + " Mode")
+
+############################################
 
 def loadParameterToMemory(switchNumber):
     if memoryRegister.count(switchNumber) == 0:
@@ -55,15 +60,20 @@ def loadParameterToMemory(switchNumber):
     else:
         memoryRegister.remove(switchNumber)
         
+def loadMemoryToInstructionRegister():
+    for page in memoryRegister:
+        instructionRegister.append(page)
+        
+        
 def writeToProgramRegister(location):
-    programRegster[location] = memoryRegister
+    programRegister[location] = memoryRegister
     global lastProgramUsed
     lastProgramUsed = location
 
-def loadProgramToInstructionRegister(patch):
+def loadProgramToMemory(patch):
     program = programRegister[patch]
     for parameter in program:
-        instructionRegister.append(parameter)
+        memoryRegister.append(parameter)
     
 def interruptWrite(pin):
     global mode
@@ -102,21 +112,20 @@ def interruptMode(pin):
             
         elif mode == "Program":
             mode = "Manual"
-    
-            instructionRegister.clear()
-            loadProgramToInstructionRegister(lastProgramUsed) #later change to last used program
+
+            loadProgramToMemory(lastProgramUsed) #later change to last used program
             global memoryRegister
-            memoryRegister = instructionRegister
+            loadMemoryToInstructionRegister()
+            instructionHandler()
             
         elif mode == "Manual":
             instructionRegister.clear()
-        print(mode + " Mode")
+        printModeStatus()
         instructionHandler()
     modeSwitch.irq(handler = interruptMode)
 
 def interruptOne(pin):
     
-    writeLocationKey = "A"
     instructionValue = 1
     
     switch1.irq(handler = None)
@@ -124,19 +133,18 @@ def interruptOne(pin):
     
     if pin.value() == 1:
         global instructionRegister
+        global lastProgramUsed
         
         if mode == "Program":
-            loadProgramToInstructionRegister(writeLocationKey)
-            global lastProgramUsed
-            lastProgramUsed = writeLocationKey
-            global memoryRegister
-            memoryRegister = instructionRegister
+            lastProgramUsed = instructionValue
+            memoryRegister.clear()
+            loadProgramToMemory(instructionValue) #refactor to loadToMemory
+            loadMemoryToInstructionRegister() #refactor to: instructionRegister = memoryRegister
             
-        else:
+        else: #if mode == "Manual"
             instructionRegister.append(instructionValue)
-            loadParameterToMemory(instructionValue)
             if mode == "Write":
-                writeLocationAddressRegister = writeLocationKey
+                writeLocationAddressRegister = instructionValue
             
         instructionHandler()
     switch1.irq(handler = interruptOne)
@@ -152,8 +160,10 @@ modeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptMode)
 writeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)
 
 def instructionHandler():
-    print("Queued Instructions: ", instructionRegister)
-    print("Memory Register: ", memoryRegister)
+    print("------------------------------------")
+    print("Instruction Register: ", instructionRegister)
+    print("------------------------------------")
+    print("Memory Register:      ", memoryRegister)
     
     if mode == "Program":
         resetOutputs()
@@ -176,3 +186,15 @@ def instructionHandler():
             led5.toggle()
                 
     instructionRegister.clear()
+    
+def startUp():
+    memoryRegister.clear()
+    resetOutputs()
+    time.sleep(1)
+    print("+++Restarted+++")
+    loadProgramToMemory(lastProgramUsed)
+    loadMemoryToInstructionRegister()
+    instructionHandler()
+    printModeStatus()
+    
+startUp()
