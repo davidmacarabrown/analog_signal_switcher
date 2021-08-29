@@ -1,7 +1,7 @@
 class Mode:
     
-    def __init__(self, initialMode):
-        self.value = initialMode
+    def __init__(self):
+        self.value = "Program"
     
     def changeMode(self, newMode):
         self.value = newMode

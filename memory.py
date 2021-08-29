@@ -2,22 +2,22 @@ class Memory:
     
     def __init__(self):
         self.contents = []
-        self.lastProgramUsed = 0
         self.writeLocationAddress = 0
+        self.currentProgram = 0
         
-    def clearOne(instruction):
-        self.contents.remove(instruction)
-    
     def clearAll(self):
         self.contents.clear()
     
     def loadInstruction(self, instruction):
         if self.contents.count(instruction) == 0:
             self.contents.append(instruction)
+        elif self.contents.count(instruction) == 1:
+            self.contents.remove(instruction)
     
-    def loadProgram(self, instructionList):
+    def loadProgram(self, program):
         self.clearAll()
-        self.contents = instructionList
+        for instruction in program:
+            self.contents.append(instruction)
             
     def readAll(self):
         return self.contents
@@ -27,3 +27,6 @@ class Memory:
     
     def updateWriteLocation(self, newAdd):
         self.writeLocationAddress = newAdd
+    
+    def updateCurrentProgram(self, newProgram):
+        self.currentProgram = newProgram
