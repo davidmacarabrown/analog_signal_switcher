@@ -6,10 +6,17 @@ class IndicatorLeds:
     
     def __init__(self):
         self.allLeds = {}
+        
+    def toggleOne(self, led):
+        self.allLeds[led].value(1)
     
-    def toggleProgram(self, program):
+    def toggleMultiple(self, program):
         for step in program:
-            self.allLeds[step].toggle()
+            self.allLeds[step].value(1)
+            
+    def toggleAll(self):
+        for led in self.allLeds.values():
+            led.value(1)
             
     def rapidBlink(self, led):
         self.allLeds[led].value(0)
@@ -25,25 +32,7 @@ class IndicatorLeds:
         self.allLeds[led].toggle()
         time.sleep(0.5)
         self.allLeds[led].toggle()
-
-# ledOne = machine.Pin(4, machine.Pin.OUT)
-# ledTwo = machine.Pin(3, machine.Pin.OUT)
-# ledThree = machine.Pin(2, machine.Pin.OUT)
-# ledFour =
-
-leds = IndicatorLeds()
-
-leds.allLeds[1] = machine.Pin(4, machine.Pin.OUT)
-leds.allLeds[2] = machine.Pin(3, machine.Pin.OUT)
-leds.allLeds[3] = machine.Pin(2, machine.Pin.OUT)
-leds.allLeds[4] = machine.Pin(1, machine.Pin.OUT)
-leds.allLeds[5] = machine.Pin(0, machine.Pin.OUT)
-leds.allLeds[6] = machine.Pin(5, machine.Pin.OUT)
-
-
-scuffedDemoProgram = [1,2,3,4,5]
-
-# leds.latchProgram(scuffedDemoProgram)
-
-leds.singleBlink(6)
-
+        
+    def resetAll(self):
+        for led in self.allLeds.values():
+            led.value(0)
