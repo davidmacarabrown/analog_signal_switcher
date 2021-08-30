@@ -6,11 +6,13 @@ from instruction import Instruction
 from program import ProgramMemory
 from mode import Mode
 
-led1 = machine.Pin(0, machine.Pin.OUT)
-led2 = machine.Pin(1, machine.Pin.OUT)
+led1 = machine.Pin(4, machine.Pin.OUT)
+led2 = machine.Pin(3, machine.Pin.OUT)
 led3 = machine.Pin(2, machine.Pin.OUT)
-led4 = machine.Pin(3, machine.Pin.OUT)
-led5 = machine.Pin(4, machine.Pin.OUT)
+led4 = machine.Pin(1, machine.Pin.OUT)
+led5 = machine.Pin(0, machine.Pin.OUT)
+
+relay1 = machine.Pin(10, machine.Pin.OUT)
 
 writeLed = machine.Pin(5, machine.Pin.OUT)
 
@@ -94,7 +96,6 @@ def interruptMode(pin):
         if mode.returnValue() == "Manual": ### Switching TO program mode
             mode.changeMode("Program")
             instructionRegister.clearAll()
-            tempMemory.clearAll()
             lastProgram = programMemory.readLastProgramUsed()
             #print("P Debug: Last Program", lastProgram)
             tempMemory.loadProgram(lastProgram)#load Last program to memory
@@ -176,7 +177,8 @@ def instructionHandler():
     for instruction in instructions:            
         
         if instruction == 1:
-            led1.toggle()
+#            led1.toggle()
+            relay1.toggle()
             
         elif instruction == 2:
             led2.toggle()
@@ -198,8 +200,6 @@ def instructionHandler():
 def startUp():
     resetLeds()
     print("           +++Restarted+++")
-    
-    tempMemory.clearAll()
       
     lastProgramUsed = programMemory.readLastProgramUsed()
     lastLocationUsed = programMemory.getLastProgramUsed()
