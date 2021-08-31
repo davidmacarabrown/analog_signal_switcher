@@ -61,6 +61,7 @@ def interruptWrite(pin):
             time.sleep(0.5)
             writeSwitch.irq(handler = writeHandler)
             
+            
 def writeHandler(pin):
     writeSwitch.irq(handler = None)
     time.sleep(writeEnableTime)
@@ -177,8 +178,7 @@ def instructionHandler():
     for instruction in instructions:            
         
         if instruction == 1:
-#            led1.toggle()
-            relay1.toggle()
+            led1.toggle()
             
         elif instruction == 2:
             led2.toggle()
