@@ -14,5 +14,5 @@ class RelayOutput:
             self.outputs[step].value(1)
     
     def resetAll(self):
-        for output in self.outputs:
+        for output in self.outputs.values():
             output.value(0)

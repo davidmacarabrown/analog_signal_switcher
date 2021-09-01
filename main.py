@@ -5,26 +5,8 @@ from memory import Memory
 from instruction import Instruction
 from program import ProgramMemory
 from mode import Mode
+import sdcard
 
-led1 = machine.Pin(4, machine.Pin.OUT)
-led2 = machine.Pin(3, machine.Pin.OUT)
-led3 = machine.Pin(2, machine.Pin.OUT)
-led4 = machine.Pin(1, machine.Pin.OUT)
-led5 = machine.Pin(0, machine.Pin.OUT)
-
-relay1 = machine.Pin(10, machine.Pin.OUT)
-
-writeLed = machine.Pin(5, machine.Pin.OUT)
-
-
-switch1 = machine.Pin(20, machine.Pin.IN, Pin.PULL_DOWN)
-switch2 = machine.Pin(19, machine.Pin.IN, Pin.PULL_DOWN)
-switch3 = machine.Pin(18, machine.Pin.IN, Pin.PULL_DOWN)
-switch4 = machine.Pin(17, machine.Pin.IN, Pin.PULL_DOWN)
-switch5 = machine.Pin(16, machine.Pin.IN, Pin.PULL_DOWN)
-
-modeSwitch = machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
-writeSwitch = machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN)
 
 ledList = [led1, led2, led3, led4, led5, writeLed]
 

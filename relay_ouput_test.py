@@ -7,8 +7,10 @@ relays.outputs[1] = machine.Pin(6, machine.Pin.OUT)
 relays.outputs[2] = machine.Pin(7, machine.Pin.OUT)
 relays.outputs[3] = machine.Pin(8, machine.Pin.OUT)
 relays.outputs[4] = machine.Pin(9, machine.Pin.OUT)
-relays.outputs[5] = machine.Pin(10, machine.Pin.OUT)
+relays.outputs[5] = machine.Pin(28, machine.Pin.OUT)
 
 testPatch = [1, 3, 5]
 
-relays.outputs[5].toggle()
+relays.resetAll()
+
+# relays.latchPatch(testPatch)
