@@ -29,4 +29,8 @@ class Memory:
         self.writeLocationAddress = newAdd
     
     def updateCurrentProgram(self, newProgram):
-        self.currentProgram = newProgram
+        self.currentProgram = int(newProgram)
+        print("Updating current program: " + str(newProgram))
+        
+    def getCurrentProgram(self):
+        return self.currentProgram

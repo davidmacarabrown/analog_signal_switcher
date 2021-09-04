@@ -56,3 +56,6 @@ oled.show()
 # oled.fill_rect(0,0,32,32,1)
 
 # oled.pixel(10,10,1)
+
+oled.fill(0)
+oled.show()

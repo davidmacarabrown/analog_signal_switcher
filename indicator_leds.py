@@ -8,15 +8,15 @@ class IndicatorLeds:
         self.allLeds = {}
         
     def toggleOne(self, led):
-        self.allLeds[led].value(1)
+        self.allLeds[led].toggle()
     
     def toggleMultiple(self, program):
         for step in program:
-            self.allLeds[step].value(1)
+            self.allLeds[step].toggle()
             
     def toggleAll(self):
         for led in self.allLeds.values():
-            led.value(1)
+            led.toggle()
             
     def rapidBlink(self, led):
         self.allLeds[led].value(0)
@@ -36,3 +36,6 @@ class IndicatorLeds:
     def resetAll(self):
         for led in self.allLeds.values():
             led.value(0)
+            
+    def resetOne(self, led):
+        self.allLeds[led].value(0)

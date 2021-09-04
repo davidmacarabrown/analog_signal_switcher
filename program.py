@@ -1,35 +1,51 @@
+import machine
+import uos
+
 class ProgramMemory:
     
     def __init__(self):
-        
-        self.contents = {
-                            "1" : [1,2,3,4,5],
-                            "2" : [3, 4, 5],
-                            "3" : [1, 5],
-                            "4" : [],
-                            "5" : []
-                        }
-        
-        self.lastProgramUsed = "1"
-        
-    def writeToLocation(self, location, array):
-        self.contents[location] = array
-        
-#     def deleteFromLocation(self, location):
-#         self.contents.pop(location)
-        
-    def readFromLocation(self, location):
-        return self.contents[location]
-    
-#     def deleteAll(self):
-#         self.contents.clear()
-
-    def getLastProgramUsed(self):
-        return self.lastProgramUsed
-        
-    def readLastProgramUsed(self):
-        last = self.lastProgramUsed
-        return self.contents[last]
+        self.lastProgramUsed = 0
     
     def updateLastProgramUsed(self, newProgram):
         self.lastProgramUsed = newProgram
+    
+    def getLastProgramUsed(self):
+        return self.lastProgramUsed
+    
+    def loadLastProgramUsed(self):
+        with open("/patch/default.txt", "r") as file:
+            lastProgram = file.read()
+            parsed = int(lastProgram)
+            self.lastProgramUsed = parsed
+        print("Loading last program used from disk: " + lastProgram)
+        return parsed
+        
+    def loadFromDisk(self, patchNo):
+        with open("/patch/" + str(patchNo) + ".txt", "r") as file:
+            bank = file.read()
+            array = []
+            for i in bank:
+                array.append(int(i))
+            print("Loading  from disk: " +str(array))
+            return array
+        
+    def writeToDisk(self, patchNo, patchData):
+        parsed = ""
+        for c in patchData:
+            parsed += str(c)
+        print("Writing " + parsed + " to location: " + str(patchNo))
+        with open("/patch/" + str(patchNo) + ".txt", "w") as file:
+            file.write(parsed)
+    
+    def setDefaultProgram(self, default):
+        parsed = str(default)
+        with open("/patch/default.txt", "w") as file:
+            print("Setting default program: " + default)
+            file.write(default)
+            
+    def readDefaultProgram(self):
+        with open("/patch/default.txt", "r") as file:
+            default = file.read()
+            print("Reading default program: " + default)
+            parsed = int(default)
+            return parsed
