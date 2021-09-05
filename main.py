@@ -1,5 +1,4 @@
 import time
-import _thread
 from machine import Pin
 from memory import Memory
 from indicator_leds import IndicatorLeds
@@ -7,6 +6,19 @@ from relay_output import RelayOutput
 from instruction import Instruction
 from program import ProgramMemory
 from mode import Mode
+#####################################################
+
+#TODO:
+    # refactor tempMem to hold bank location and patch location as an object or list
+    # refactor tempMem methods to handle reading/writing to the object or list
+    # refactor write mode to include the bank location as well as patch number
+    # refactor updateDefaultProgram mentions to use the new sturcture
+    # work on interrupt handling for other buttons
+    # possibly rework instructionHandler to call the read operations in program mode, move them away from the interrupt "program" mode
+    # add self.currentBank to tempMemory for referencing during write operations
+    # refactor startup to account for new changes to registers
+    # make json files for as many banks as I think there will be?
+    # basically debug anything that breaks which will probably be... everything???
 
 
 #################################################### BUTTONS
@@ -116,7 +128,7 @@ def interruptMode(pin):
             
     modeSwitch.irq(handler = interruptMode)
 
-def interruptOne(pin):
+def interruptOne(pin, val):
     
     instructionValue = 1
     
@@ -150,7 +162,7 @@ def interruptOne(pin):
     
 
         
-switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne)
+switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne(Pin, 1))
 # switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
 # switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
 # switch4.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFour)
