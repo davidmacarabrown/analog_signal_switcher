@@ -2,8 +2,9 @@ class Memory:
     
     def __init__(self):
         self.contents = []
-        self.writeLocationAddress = 0
-        self.currentProgram = 0
+        self.writeLocationAddress = ""
+        self.currentBank = 0
+        self.currentPatch = 0
         
     def clearAll(self):
         self.contents.clear()
@@ -14,9 +15,9 @@ class Memory:
         elif self.contents.count(instruction) == 1:
             self.contents.remove(instruction)
     
-    def loadProgram(self, program):
+    def loadPatch(self, instructions):
         self.clearAll()
-        for instruction in program:
+        for instruction in instructions:
             self.contents.append(instruction)
             
     def readAll(self):
@@ -26,11 +27,20 @@ class Memory:
         return self.writeLocationAddress
     
     def updateWriteLocation(self, newAdd):
-        self.writeLocationAddress = newAdd
-    
-    def updateCurrentProgram(self, newProgram):
-        self.currentProgram = int(newProgram)
-        print("Updating current program: " + str(newProgram))
+        self.writeLocationAddress = str(newAdd)
         
-    def getCurrentProgram(self):
-        return self.currentProgram
+    def resetWriteLocation(self):
+        self.writeLocationAddress = ""
+    
+    def updateCurrentPatch(self, newPatch):
+        self.currentPatch = newPatch
+        print("Updating current patch: " + str(newPatch))
+        
+    def getCurrentPatch(self):
+        return self.currentPatch
+    
+    def updateCurrentBank(self, newBank):
+        self.currentBank = newBank
+    
+    def getCurrentBank(self):
+        return self.currentBank
