@@ -5,9 +5,19 @@ class Memory:
         self.writeLocationAddress = ""
         self.currentBank = 0
         self.currentPatch = 0
+        self.inputRegister = 0
         
     def clearAll(self):
         self.contents.clear()
+        
+    def readInputRegister(self):
+        return this.inputRegister
+    
+    def updateInputRegister(self, newInput):
+        this.inputRegister = newInput
+    
+    def clearInputRegister(self):
+        this.inputRegister = 0
     
     def loadInstruction(self, instruction):
         if self.contents.count(instruction) == 0:

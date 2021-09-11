@@ -8,12 +8,15 @@ class ProgramMemory:
         pass
     
     def setDefaultPatch(self, bankNo, patchNo):
-        tempDict = {
-            "patch": patchNo,
-            "bank": bankNo
-                }
-        with open("/program/default.json", "w") as file:
-            json.dump(tempDict, file)
+        if type(bankNo) == int and type(patchNo) == int:
+            tempDict = {
+                "patch": patchNo,
+                "bank": bankNo
+                    }
+            with open("/program/default.json", "w") as file:
+                json.dump(tempDict, file)
+        else:
+            print("Program Memory: INCORRECT TYPE FOR setDefaultPatch")
             
     def loadDefaultPatch(self):
         tempDict = {
@@ -26,16 +29,27 @@ class ProgramMemory:
         
         
     def loadPatch(self, bankNo, patchNo):
-        data = None
-        with open("/program/bank" + str(bankNo) + ".json", "r") as file:
-            data = json.load(file)
-        patch = data[str(patchNo)]
-        return patch
+        if type(bankNo) == int and type(patchNo) == int:
+            data = None
+            bankNoParsed = str(bankNo)
+            patchNoParsed = str(patchNo)
+            with open("/program/bank" + bankNoParsed + ".json", "r") as file:
+                data = json.load(file)
+            patch = data[patchNoParsed]
+            return patch
+        else:
+            print("Program Memory: INCORRECT TYPE FOR loadPatch")
        
     def writePatch(self, bankNo, patchNo, patchData):
-        data = None
-        with open("/program/bank" +str(bankNo) + ".json", "r") as file:
-            data = json.load(file)
-        data[str(patchNo)] = patchData
-        with open("/program/bank" + str(bankNo) + ".json", "w") as write:
-            json.dump(data, write)
+        if type(bankNo) == int and type(patchNo) == int:
+            bankNoParsed = str(bankNo)
+            patchNoParsed = str(patchNo)
+            
+            data = None
+            with open("/program/bank" + bankNoParsed + ".json", "r") as file:
+                data = json.load(file)
+            data[patchNoParsed] = patchData
+            with open("/program/bank" + bankNoParsed + ".json", "w") as write:
+                json.dump(data, write)
+        else:
+            print("Program Memory: INCORRECT TYPE FOR writePatch")

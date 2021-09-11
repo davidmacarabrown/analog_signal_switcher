@@ -10,10 +10,10 @@ from mode import Mode
 
 #TODO:
 
-    # work on interrupt handling for other buttons
+    #[DOING] work on interrupt handling for other buttons
     # possibly rework instructionHandler to call the read operations in program mode, move them away from the interrupt "program" mode
-    # make json files for as many banks as I think there will be?
-    # add functionality to mode button to cycle through banks, or add other buttons for this... other buttons probably neater, plenty of i/o pins left
+    # make json files for as many banks as I think there will be, or figure out checks if the bank exists, and if not create new file?
+    # add functionality to mode button to cycle through banks, or add other buttons for this... other buttons probably neater, plenty of i/o pins left - "bank select" as a mode?
     # work on display functionality
     # basically debug anything that breaks which will probably be... everything???
 
@@ -88,9 +88,9 @@ def writeHandler(pin):
         fl = 0
         while fl < 4:
             leds.toggleOne("write")
-            time.sleep(0.15)
+            time.sleep(0.1)
             leds.toggleOne("write")
-            time.sleep(0.15)
+            time.sleep(0.1)
             
             fl += 1
         
@@ -151,7 +151,7 @@ def interruptOne(pin):
                 currentBank = tempMemory.getCurrentBank
                 programMemory.setDefaultPatch(currentBank, instructionValue)
                 tempMemory.updateCurrentPatch(instructionValue)
-                toLoad = programMemory.loadFromDisk(currentBank,instructionValue)
+                toLoad = programMemory.loadPatch(currentBank,instructionValue)
                 tempMemory.loadPatch(toLoad)
                 instructionRegister.loadPatch(tempMemory.contents)
                 instructionHandler()
