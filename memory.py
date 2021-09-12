@@ -2,10 +2,10 @@ class Memory:
     
     def __init__(self):
         self.contents = []
-        self.writeLocationAddress = ""
-        self.currentBank = 0
-        self.currentPatch = 0
-        self.inputRegister = 0
+        self.writeLocationAddress = None
+        self.currentBank = None
+        self.currentPatch = None
+        self.inputRegister = None
         
     def clearAll(self):
         self.contents.clear()
@@ -17,7 +17,7 @@ class Memory:
         this.inputRegister = newInput
     
     def clearInputRegister(self):
-        this.inputRegister = 0
+        this.inputRegister = None
     
     def loadInstruction(self, instruction):
         if self.contents.count(instruction) == 0:
@@ -37,7 +37,7 @@ class Memory:
         return self.writeLocationAddress
     
     def updateWriteLocation(self, newAdd):
-        self.writeLocationAddress = str(newAdd)
+        self.writeLocationAddress = newAdd
         
     def resetWriteLocation(self):
         self.writeLocationAddress = ""

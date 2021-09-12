@@ -24,6 +24,7 @@ switch2 = machine.Pin(19, machine.Pin.IN, Pin.PULL_DOWN)
 switch3 = machine.Pin(18, machine.Pin.IN, Pin.PULL_DOWN)
 switch4 = machine.Pin(17, machine.Pin.IN, Pin.PULL_DOWN)
 switch5 = machine.Pin(16, machine.Pin.IN, Pin.PULL_DOWN)
+
 writeSwitch = machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN)
 modeSwitch = machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
 
@@ -130,47 +131,80 @@ def interruptMode(pin):
             
     modeSwitch.irq(handler = interruptMode)
 
-def interruptOne(pin):
+def interruptHandler(instructionValue):
     
-    instructionValue = 1
-    
-    switch1.irq(handler = None)
-    time.sleep(buttonPad)
-    
-    if pin.value() == 1:
+    print(type(instructionValue), instructionValue)
         
-        if mode.returnValue() == "Manual":
-            tempMemory.loadInstruction(instructionValue)
-            instructionRegister.loadInstruction(instructionValue)
+    if mode.returnValue() == "Manual":
+        tempMemory.loadInstruction(instructionValue)
+        instructionRegister.loadInstruction(instructionValue)
+        instructionHandler()
+        
+    elif mode.returnValue() == "Program":
+        if tempMemory.getCurrentPatch() == instructionValue:
+            pass
+        else:
+            currentBank = tempMemory.getCurrentBank()
+            programMemory.setDefaultPatch(currentBank, instructionValue)
+            tempMemory.updateCurrentPatch(instructionValue)
+            toLoad = programMemory.loadPatch(currentBank,instructionValue)
+            tempMemory.loadPatch(toLoad)
+            instructionRegister.loadPatch(tempMemory.contents)
             instructionHandler()
-        
-        elif mode.returnValue() == "Program":
-            if tempMemory.getCurrentPatch() == instructionValue:
-                pass
-            else:
-                currentBank = tempMemory.getCurrentBank
-                programMemory.setDefaultPatch(currentBank, instructionValue)
-                tempMemory.updateCurrentPatch(instructionValue)
-                toLoad = programMemory.loadPatch(currentBank,instructionValue)
-                tempMemory.loadPatch(toLoad)
-                instructionRegister.loadPatch(tempMemory.contents)
-                instructionHandler()
             
-        elif mode.returnValue() == "Write":
-                tempMemory.updateWriteLocation(instructionValue)
-                leds.toggleOne(instructionValue)
-                time.sleep(0.3)
-                leds.toggleOne(instructionValue)
-                print("Write location Bank: " + str(tempMemory.getCurrentBank()) + " Patch: " + str(tempMemory.getWriteLocation()) + " selected.") 
-    switch1.irq(handler = interruptOne)
-    
+    elif mode.returnValue() == "Write":
+            tempMemory.updateWriteLocation(instructionValue)
+            leds.toggleOne(instructionValue)
+            time.sleep(0.3)
+            leds.toggleOne(instructionValue)
+            print("Write location Bank: " + str(tempMemory.getCurrentBank()) + " Patch: " + str(tempMemory.getWriteLocation()) + " selected.") 
 
-        
-switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptOne)
-# switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptTwo)
-# switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptThree)
-# switch4.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFour)
-# switch5.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptFive)
+def intOne(pin):
+    pinValue = 1
+    pin.irq(handler = None)
+    time.sleep(0.1)
+    if pin.value() == 1:
+        interruptHandler(pinValue)
+    pin.irq(handler = intOne)
+
+def intTwo(pin):
+    pinValue = 2
+    pin.irq(handler = None)
+    time.sleep(0.1)
+    if pin.value() == 1:
+        interruptHandler(pinValue)
+    pin.irq(handler = intTwo)
+
+def intThree(pin):
+    pinValue = 3
+    pin.irq(handler = None)
+    time.sleep(0.1)
+    if pin.value() == 1:
+        interruptHandler(pinValue)
+    pin.irq(handler = intThree)
+
+def intFour(pin):
+    pinValue = 4
+    pin.irq(handler = None)
+    time.sleep(0.1)
+    if pin.value() == 1:
+        interruptHandler(pinValue)
+    pin.irq(handler = intFour)
+
+def intFive(pin):
+    pinValue = 5
+    pin.irq(handler = None)
+    time.sleep(0.1)
+    if pin.value() == 1:
+        interruptHandler(pinValue)
+    pin.irq(handler = intFive)
+
+
+switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=intOne)
+switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=intTwo)
+switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=intThree)
+switch4.irq(trigger=machine.Pin.IRQ_RISING, handler=intFour)
+switch5.irq(trigger=machine.Pin.IRQ_RISING, handler=intFive)
 
 modeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptMode)
 writeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)

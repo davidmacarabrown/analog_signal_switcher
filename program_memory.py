@@ -17,6 +17,7 @@ class ProgramMemory:
                 json.dump(tempDict, file)
         else:
             print("Program Memory: INCORRECT TYPE FOR setDefaultPatch")
+            print("patchNo: " + str(type(patchNo)) + "bankNo: " + str(type(bankNo)))
             
     def loadDefaultPatch(self):
         tempDict = {
@@ -53,3 +54,4 @@ class ProgramMemory:
                 json.dump(data, write)
         else:
             print("Program Memory: INCORRECT TYPE FOR writePatch")
+            print("patchNo: " + str(type(patchNo)) + "bankNo: " + str(type(bankNo)))
