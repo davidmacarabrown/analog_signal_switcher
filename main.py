@@ -36,7 +36,7 @@ writeEnableTime = 2.5
 # Interrupt Definitions
     
 def interruptWrite(pin):
-    writeSwitch.irq(handler = None)
+    inputs.switches["write"].irq(handler = None)
     time.sleep(writeEnableTime)
     
     if pin.value() == 1:
@@ -44,15 +44,15 @@ def interruptWrite(pin):
             mode.changeMode("Write")
             display.clear()
             display.update_mode(mode.returnValue())
-            print("++++ Executing in WRITE mode ++++")
+            display.refresh()
             leds.resetAll()
             leds.toggleOne(6)
             time.sleep(0.5)
-    writeSwitch.irq(handler = writeHandler)
+    inputs.switches["write"].irq(handler = writeHandler)
             
 def writeHandler(pin):
         
-    writeSwitch.irq(handler = None)
+    inputs.switches["write"].irq(handler = None)
     time.sleep(writeEnableTime)
             
     if pin.value() == 1:
@@ -65,28 +65,26 @@ def writeHandler(pin):
         instructionRegister.loadPatch(patch)
         display.clear()
         display.update_line_one(">> Saving...")
+        display.refresh()
 
         leds.rapidBlink(6)
-        
-        print("---- Saving to Memory ----")
-         
         tempMemory.resetWriteLocation()
         mode.changeMode("Program")
         display.clear()
         time.sleep(0.1)
         instructionHandler()
         
-        writeSwitch.irq(handler = interruptWrite)
+        inputs.switches["write"].irq(handler = interruptWrite)
      
 def interruptMode(pin):
 
-    modeSwitch.irq(handler = None)
+    inputs.switches["mode"].irq(handler = None)
     time.sleep(buttonPad)
     
     if pin.value() == 1:
-        
         display.clear()
         
+        #entering program mode
         if mode.returnValue() == "Manual":       ### Switching TO program mode
             
             mode.changeMode("Program")
@@ -99,21 +97,23 @@ def interruptMode(pin):
             instructionHandler()
             
             display.update_bank(tempMemory.getCurrentBank())
-            
+        
+        #entering manual mode
         elif mode.returnValue() == "Program":
-            mode.changeMode("Manual")            ### Switching TO Manual mode
-            print("Manual Mode")
-            
+            mode.changeMode("Manual")
+        
+        #exiting write mode
         elif mode.returnValue() == "Write":
             mode.changeMode("Manual")
-            writeSwitch.irq(handler = interruptWrite)
+            inputs.switches["write"].irq(handler = interruptWrite)
             leds.resetAll()
             tempMemory.resetWriteLocation()
             instructionRegister.loadPatch(tempMemory.readAll())
             instructionHandler()
             
     display.update_mode(mode.returnValue())
-    modeSwitch.irq(handler = interruptMode)
+    display.refresh()
+    inputs.switches["mode"].irq(handler = interruptMode)
 
 def interruptHandler(instructionValue):
         
@@ -141,7 +141,6 @@ def interruptHandler(instructionValue):
             leds.toggleOne(instructionValue)
             time.sleep(0.3)
             leds.toggleOne(instructionValue)
-            print("Write location Bank: " + str(tempMemory.getCurrentBank()) + " Patch: " + str(tempMemory.getWriteLocation()) + " selected.") 
 
 def intOne(pin):
     pinValue = 1
@@ -193,13 +192,15 @@ inputs.switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=intFive)
 inputs.switches["mode"].irq(trigger=machine.Pin.IRQ_RISING, handler=interruptMode)
 inputs.switches["write"].irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)
 
+debug = False
 
 def instructionHandler():
-    print("--------------------------------")
-    print("Executing in ", mode.returnValue(), " mode")
-    print("--------------------------------")
-    print("Instruction Register: ", instructionRegister.contents)
-    print("Memory Register:      ", tempMemory.readAll())
+    if debug:
+        print("--------------------------------")
+        print("Executing in ", mode.returnValue(), " mode")
+        print("--------------------------------")
+        print("Instruction Register: ", instructionRegister.contents)
+        print("Memory Register:      ", tempMemory.readAll())
     
     if mode.returnValue() == "Program":
         leds.resetAll()
@@ -208,26 +209,25 @@ def instructionHandler():
         display.update_mode(mode.returnValue())
         display.update_bank(tempMemory.getCurrentBank())
         display.update_patch(tempMemory.getCurrentPatch())
+        display.refresh()
         
-    instructions = instructionRegister.read()
-    
-    leds.toggleMultiple(instructions)
-    relays.latchPatch(instructions)
+    leds.toggleMultiple(instructionRegister.read())
+    relays.latchPatch(instructionRegister.read())
                 
     instructionRegister.clearAll()
-    print("--------------------------------")
-    print("Instruction Register: ", instructionRegister.contents)
-    print("Memory Register:      ", tempMemory.contents)
     
+    if debug:
+        print("--------------------------------")
+        print("Instruction Register: ", instructionRegister.contents)
+        print("Memory Register:      ", tempMemory.contents)
+        
 def startUp():
     leds.resetAll()
     relays.resetAll()
     display.clear()
     display.update_line_one("Starting...")
+    display.refresh()
     time.sleep(1)
-    
-    print("           +++Restarted+++")
-    print("--------------------------------")
     
     defaultData = programMemory.loadDefaultPatch()
     defaultBank = defaultData["bank"]
@@ -238,15 +238,8 @@ def startUp():
     tempMemory.loadPatch(startPatch)
     tempMemory.updateCurrentPatch(defaultPatch)
     tempMemory.updateCurrentBank(defaultBank)
-    
-    print("--------------------------------")
-    print("Current Bank: " + str(tempMemory.getCurrentBank()))
-    
-    print(startPatch, "last program used")
-    initialState = tempMemory.readAll()
-    print(initialState, "tempMemory contents")
-    instructionRegister.loadPatch(initialState)
-    print(instructionRegister.contents, "instruction register")
+
+    instructionRegister.loadPatch(tempMemory.readAll())
     instructionHandler()
 
 startUp()
