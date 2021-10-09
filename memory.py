@@ -40,7 +40,7 @@ class Memory:
         self.writeLocationAddress = newAdd
         
     def resetWriteLocation(self):
-        self.writeLocationAddress = ""
+        self.writeLocationAddress = None
     
     def updateCurrentPatch(self, newPatch):
         self.currentPatch = newPatch
