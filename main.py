@@ -20,7 +20,8 @@ from display import Display
     # basically debug anything that breaks which will probably be... everything???
 
 
-#################################################### BUTTONS
+###################################################### BUTTONS
+    
 switch1 = machine.Pin(20, machine.Pin.IN, Pin.PULL_DOWN)
 switch2 = machine.Pin(19, machine.Pin.IN, Pin.PULL_DOWN)
 switch3 = machine.Pin(18, machine.Pin.IN, Pin.PULL_DOWN)
@@ -31,27 +32,16 @@ writeSwitch = machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN)
 modeSwitch = machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
 
 #################################################### RELAY OUTPUTS
+
 relays = RelayOutput()
 
-relays.outputs[1] = machine.Pin(6, machine.Pin.OUT)
-relays.outputs[2] = machine.Pin(7, machine.Pin.OUT)
-relays.outputs[3] = machine.Pin(8, machine.Pin.OUT)
-relays.outputs[4] = machine.Pin(9, machine.Pin.OUT)
-relays.outputs[5] = machine.Pin(28, machine.Pin.OUT)
+#################################################### BUTTON PADDING
 
 buttonPad = 0.1
 writeEnableTime = 2.5
 
 ##################################################### INDICATOR LEDS
 leds = IndicatorLeds()
-
-leds.allLeds[1] = machine.Pin(4, machine.Pin.OUT)
-leds.allLeds[2] = machine.Pin(3, machine.Pin.OUT)
-leds.allLeds[3] = machine.Pin(2, machine.Pin.OUT)
-leds.allLeds[4] = machine.Pin(1, machine.Pin.OUT)
-leds.allLeds[5] = machine.Pin(0, machine.Pin.OUT)
-
-leds.allLeds[6] = machine.Pin(5, machine.Pin.OUT)
 
 ################################################## display
 
