@@ -1,11 +1,13 @@
 import time
-from machine import Pin
+from machine import Pin, I2C
 from memory import Memory
 from indicator_leds import IndicatorLeds
 from relay_output import RelayOutput
 from instruction import Instruction
 from program_memory import ProgramMemory
 from mode import Mode
+from display import Display
+
 #####################################################
 
 #TODO:
@@ -14,7 +16,7 @@ from mode import Mode
     # possibly rework instructionHandler to call the read operations in program mode, move them away from the interrupt "program" mode
     # make json files for as many banks as I think there will be, or figure out checks if the bank exists, and if not create new file?
     # add functionality to mode button to cycle through banks, or add other buttons for this... other buttons probably neater, plenty of i/o pins left - "bank select" as a mode?
-    # work on display functionality
+    # [DOING] work on display functionality
     # basically debug anything that breaks which will probably be... everything???
 
 
@@ -49,7 +51,11 @@ leds.allLeds[3] = machine.Pin(2, machine.Pin.OUT)
 leds.allLeds[4] = machine.Pin(1, machine.Pin.OUT)
 leds.allLeds[5] = machine.Pin(0, machine.Pin.OUT)
 
-leds.allLeds["write"] = machine.Pin(5, machine.Pin.OUT)
+leds.allLeds[6] = machine.Pin(5, machine.Pin.OUT)
+
+################################################## display
+
+display = Display()
 
 ################################################# OBJECTS
 
@@ -67,9 +73,11 @@ def interruptWrite(pin):
     if pin.value() == 1:
         if mode.returnValue() == "Manual" or "Program":
             mode.changeMode("Write")
+            display.clear()
+            display.update_mode(mode.returnValue())
             print("++++ Executing in WRITE mode ++++")
             leds.resetAll()
-            leds.toggleOne("write")
+            leds.toggleOne(6)
             time.sleep(0.5)
     writeSwitch.irq(handler = writeHandler)
             
@@ -85,24 +93,21 @@ def writeHandler(pin):
         
         programMemory.writePatch(bankAddress, patchAddress, patch)
         programMemory.setDefaultPatch(bankAddress, patchAddress)
-        instructionRegister.loadPatch(patch)  
-        fl = 0
-        while fl < 4:
-            leds.toggleOne("write")
-            time.sleep(0.1)
-            leds.toggleOne("write")
-            time.sleep(0.1)
-            
-            fl += 1
+        instructionRegister.loadPatch(patch)
+        display.clear()
+        display.update_line_one(">> Saving...")
+
+        leds.rapidBlink(6)
         
         print("---- Saving to Memory ----")
          
         tempMemory.resetWriteLocation()
         mode.changeMode("Program")
+        display.clear()
         time.sleep(0.1)
         instructionHandler()
         
-    writeSwitch.irq(handler = interruptWrite)
+        writeSwitch.irq(handler = interruptWrite)
      
 def interruptMode(pin):
 
@@ -110,6 +115,9 @@ def interruptMode(pin):
     time.sleep(buttonPad)
     
     if pin.value() == 1:
+        
+        display.clear()
+        
         if mode.returnValue() == "Manual":       ### Switching TO program mode
             
             mode.changeMode("Program")
@@ -121,6 +129,7 @@ def interruptMode(pin):
             instructionRegister.loadPatch(tempMemory.readAll())
             instructionHandler()
             
+            display.update_bank(tempMemory.getCurrentBank())
             
         elif mode.returnValue() == "Program":
             mode.changeMode("Manual")            ### Switching TO Manual mode
@@ -128,12 +137,16 @@ def interruptMode(pin):
             
         elif mode.returnValue() == "Write":
             mode.changeMode("Manual")
+            writeSwitch.irq(handler = interruptWrite)
+            leds.resetAll()
+            tempMemory.resetWriteLocation()
+            instructionRegister.loadPatch(tempMemory.readAll())
+            instructionHandler()
             
+    display.update_mode(mode.returnValue())
     modeSwitch.irq(handler = interruptMode)
 
 def interruptHandler(instructionValue):
-    
-    print(type(instructionValue), instructionValue)
         
     if mode.returnValue() == "Manual":
         tempMemory.loadInstruction(instructionValue)
@@ -145,11 +158,13 @@ def interruptHandler(instructionValue):
             pass
         else:
             currentBank = tempMemory.getCurrentBank()
+            
             programMemory.setDefaultPatch(currentBank, instructionValue)
             tempMemory.updateCurrentPatch(instructionValue)
             toLoad = programMemory.loadPatch(currentBank,instructionValue)
             tempMemory.loadPatch(toLoad)
             instructionRegister.loadPatch(tempMemory.contents)
+            display.update_patch(tempMemory.getCurrentPatch())
             instructionHandler()
             
     elif mode.returnValue() == "Write":
@@ -219,6 +234,11 @@ def instructionHandler():
     if mode.returnValue() == "Program":
         leds.resetAll()
         relays.resetAll()
+        display.clear()
+        display.update_mode(mode.returnValue())
+        display.update_bank(tempMemory.getCurrentBank())
+        display.update_patch(tempMemory.getCurrentPatch())
+        
     instructions = instructionRegister.read()
     
     leds.toggleMultiple(instructions)
@@ -232,6 +252,10 @@ def instructionHandler():
 def startUp():
     leds.resetAll()
     relays.resetAll()
+    display.clear()
+    display.update_line_one("Starting...")
+    time.sleep(1)
+    
     print("           +++Restarted+++")
     print("--------------------------------")
     
@@ -246,6 +270,7 @@ def startUp():
     tempMemory.updateCurrentBank(defaultBank)
     
     print("--------------------------------")
+    print("Current Bank: " + str(tempMemory.getCurrentBank()))
     
     print(startPatch, "last program used")
     initialState = tempMemory.readAll()
@@ -253,5 +278,5 @@ def startUp():
     instructionRegister.loadPatch(initialState)
     print(instructionRegister.contents, "instruction register")
     instructionHandler()
-    
+
 startUp()
