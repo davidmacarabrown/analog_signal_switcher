@@ -65,6 +65,7 @@ def writeHandler(pin):
         instructionRegister.loadPatch(patch)
         display.clear()
         display.update_line_one(">> Saving...")
+        display.update_line_two("> " + str(patchAddress))
         display.refresh()
 
         leds.rapidBlink(6)
@@ -74,7 +75,7 @@ def writeHandler(pin):
         time.sleep(0.1)
         instructionHandler()
         
-        inputs.switches["write"].irq(handler = interruptWrite)
+    inputs.switches["write"].irq(handler = interruptWrite)
      
 def interruptMode(pin):
 
@@ -138,6 +139,8 @@ def interruptHandler(instructionValue):
             
     elif mode.returnValue() == "Write":
             tempMemory.updateWriteLocation(instructionValue)
+            display.update_line_two("Location: " + str(instructionValue))
+            display.refresh()
             leds.toggleOne(instructionValue)
             time.sleep(0.3)
             leds.toggleOne(instructionValue)

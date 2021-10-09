@@ -18,9 +18,10 @@ class Display:
         self.line_two = None
         self.bank= None
         self.patch= None
-        
+    
     def refresh(self):
         self.display.fill(0)
+        self.display.show()
         
         if self.mode:
             self.display.text(self.mode, 0, 4)
@@ -52,4 +53,3 @@ class Display:
 
 
     
-
