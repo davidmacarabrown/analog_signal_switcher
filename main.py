@@ -7,8 +7,7 @@ from instruction import Instruction
 from program_memory import ProgramMemory
 from mode import Mode
 from display import Display
-
-#####################################################
+from switches import Switches
 
 #TODO:
 
@@ -19,42 +18,22 @@ from display import Display
     # [DOING] work on display functionality
     # basically debug anything that breaks which will probably be... everything???
 
-
-###################################################### BUTTONS
-    
-switch1 = machine.Pin(20, machine.Pin.IN, Pin.PULL_DOWN)
-switch2 = machine.Pin(19, machine.Pin.IN, Pin.PULL_DOWN)
-switch3 = machine.Pin(18, machine.Pin.IN, Pin.PULL_DOWN)
-switch4 = machine.Pin(17, machine.Pin.IN, Pin.PULL_DOWN)
-switch5 = machine.Pin(16, machine.Pin.IN, Pin.PULL_DOWN)
-
-writeSwitch = machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN)
-modeSwitch = machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
-
-#################################################### RELAY OUTPUTS
-
-relays = RelayOutput()
-
-#################################################### BUTTON PADDING
-
-buttonPad = 0.1
-writeEnableTime = 2.5
-
-##################################################### INDICATOR LEDS
-leds = IndicatorLeds()
-
-################################################## display
-
-display = Display()
-
-################################################# OBJECTS
+# Object Setup
 
 programMemory = ProgramMemory()
 tempMemory = Memory()
 instructionRegister = Instruction()
 mode = Mode()
+inputs = Switches()
+relays = RelayOutput()
+leds = IndicatorLeds()
+display = Display()
 
-############################################
+# Time and button padding for de-bounce
+buttonPad = 0.1
+writeEnableTime = 2.5
+
+# Interrupt Definitions
     
 def interruptWrite(pin):
     writeSwitch.irq(handler = None)
@@ -204,15 +183,16 @@ def intFive(pin):
         interruptHandler(pinValue)
     pin.irq(handler = intFive)
 
+# Interrupt triggers
 
-switch1.irq(trigger=machine.Pin.IRQ_RISING, handler=intOne)
-switch2.irq(trigger=machine.Pin.IRQ_RISING, handler=intTwo)
-switch3.irq(trigger=machine.Pin.IRQ_RISING, handler=intThree)
-switch4.irq(trigger=machine.Pin.IRQ_RISING, handler=intFour)
-switch5.irq(trigger=machine.Pin.IRQ_RISING, handler=intFive)
+inputs.switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=intOne)
+inputs.switches[2].irq(trigger=machine.Pin.IRQ_RISING, handler=intTwo)
+inputs.switches[3].irq(trigger=machine.Pin.IRQ_RISING, handler=intThree)
+inputs.switches[4].irq(trigger=machine.Pin.IRQ_RISING, handler=intFour)
+inputs.switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=intFive)
+inputs.switches["mode"].irq(trigger=machine.Pin.IRQ_RISING, handler=interruptMode)
+inputs.switches["write"].irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)
 
-modeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptMode)
-writeSwitch.irq(trigger=machine.Pin.IRQ_RISING, handler=interruptWrite)
 
 def instructionHandler():
     print("--------------------------------")
