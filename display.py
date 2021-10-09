@@ -18,7 +18,6 @@ class Display:
         self.line_two = None
         self.bank= None
         self.patch= None
-        self.display.fill(0)
         
     def refresh(self):
         self.display.fill(0)
