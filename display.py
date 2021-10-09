@@ -38,22 +38,19 @@ class Display:
     
     def update_mode(self, modeIn):
         self.mode = ">> " + str(modeIn)
-        self.refresh()
         
     def update_line_one(self, line):
         self.line_one = str(line)
-        self.refresh()
-        
+
     def update_line_two(self, line):
         self.line_two = str(line)
-        self.refresh()
 
     def update_bank(self, bank):
         self.bank = "Bank:" + str(bank)
-        self.refresh()
 
     def update_patch(self, patch):
         self.patch = "Patch:" + str(patch)
-        self.refresh()
+
 
     
+
