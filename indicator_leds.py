@@ -1,11 +1,17 @@
-from machine import Pin
 import time
-
+import machine
         
 class IndicatorLeds:
     
     def __init__(self):
-        self.allLeds = {}
+        self.allLeds = {
+                        1: machine.Pin(4, machine.Pin.OUT),
+                        2: machine.Pin(3, machine.Pin.OUT),
+                        3: machine.Pin(2, machine.Pin.OUT),
+                        4: machine.Pin(1, machine.Pin.OUT),
+                        5: machine.Pin(0, machine.Pin.OUT),
+                        6: machine.Pin(5, machine.Pin.OUT)
+                        }
         
     def toggleOne(self, led):
         self.allLeds[led].toggle()
@@ -39,3 +45,4 @@ class IndicatorLeds:
             
     def resetOne(self, led):
         self.allLeds[led].value(0)
+
