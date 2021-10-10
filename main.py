@@ -34,7 +34,6 @@ buttonPad = 0.1
 writeEnableTime = 2.5
 
 # Interrupt Definitions
-    
 def interruptWrite(pin):
     inputs.switches["write"].irq(handler = None)
     time.sleep(writeEnableTime)
@@ -56,26 +55,38 @@ def writeHandler(pin):
     time.sleep(writeEnableTime)
             
     if pin.value() == 1:
-        patchAddress = tempMemory.getWriteLocation()
-        bankAddress = tempMemory.getCurrentBank()
-        patch = tempMemory.readAll()
-        
-        programMemory.writePatch(bankAddress, patchAddress, patch)
-        programMemory.setDefaultPatch(bankAddress, patchAddress)
-        instructionRegister.loadPatch(patch)
-        display.clear()
-        display.update_line_one(">> Saving...")
-        display.update_line_two("> " + str(patchAddress))
-        display.refresh()
+        if tempMemory.getWriteLocation():
+            patchAddress = tempMemory.getWriteLocation()
+            bankAddress = tempMemory.getCurrentBank()
+            patch = tempMemory.readAll()
+            
+            programMemory.writePatch(bankAddress, patchAddress, patch)
+            programMemory.setDefaultPatch(bankAddress, patchAddress)
+            instructionRegister.loadPatch(patch)
+            display.clear()
+            display.update_line_one(">> Saving...")
+            display.update_line_two("> " + str(patchAddress))
+            display.refresh()
 
-        leds.rapidBlink(6)
-        tempMemory.resetWriteLocation()
-        mode.changeMode("Program")
-        display.clear()
-        time.sleep(0.1)
-        instructionHandler()
-        
-    inputs.switches["write"].irq(handler = interruptWrite)
+            leds.rapidBlink(6)
+            tempMemory.resetWriteLocation()
+            mode.changeMode("Program")
+            display.clear()
+            time.sleep(0.1)
+            instructionHandler()
+            
+            inputs.switches["write"].irq(handler = interruptWrite)
+        else:
+            display.clear()
+            display.update_line_one("Select Location")
+            display.update_line_two("Mode > Exit")
+            display.refresh()
+            time.sleep(1.5)
+            
+            inputs.switches["write"].irq(handler = writeHandler)
+            display.clear()
+            display.update_mode(mode.returnValue())
+            display.refresh()
      
 def interruptMode(pin):
 
@@ -86,7 +97,7 @@ def interruptMode(pin):
         display.clear()
         
         #entering program mode
-        if mode.returnValue() == "Manual":       ### Switching TO program mode
+        if mode.returnValue() == "Manual": 
             
             mode.changeMode("Program")
             instructionRegister.clearAll()
@@ -186,7 +197,6 @@ def intFive(pin):
     pin.irq(handler = intFive)
 
 # Interrupt triggers
-
 inputs.switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=intOne)
 inputs.switches[2].irq(trigger=machine.Pin.IRQ_RISING, handler=intTwo)
 inputs.switches[3].irq(trigger=machine.Pin.IRQ_RISING, handler=intThree)
