@@ -3,8 +3,8 @@ class Mode:
     def __init__(self):
         self.value = "Program"
     
-    def changeMode(self, newMode):
+    def change_mode(self, newMode):
         self.value = newMode
         
-    def returnValue(self):
+    def return_value(self):
         return self.value

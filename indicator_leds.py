@@ -13,18 +13,18 @@ class IndicatorLeds:
                         6: machine.Pin(5, machine.Pin.OUT)
                         }
         
-    def toggleOne(self, led):
+    def toggle(self, led):
         self.allLeds[led].toggle()
     
-    def toggleMultiple(self, program):
+    def toggle_multi(self, program):
         for step in program:
             self.allLeds[step].toggle()
             
-    def toggleAll(self):
+    def toggle_all(self):
         for led in self.allLeds.values():
             led.toggle()
             
-    def rapidBlink(self, led):
+    def rapid_blink(self, led):
         self.allLeds[led].value(0)
         time.sleep(0.05)
         i = 0
@@ -33,16 +33,15 @@ class IndicatorLeds:
             time.sleep(0.05)
             i += 1
     
-    def singleBlink(self, led):
+    def single_blink(self, led):
         self.allLeds[led].value(0)
         self.allLeds[led].toggle()
         time.sleep(0.5)
         self.allLeds[led].toggle()
         
-    def resetAll(self):
+    def reset_all(self):
         for led in self.allLeds.values():
             led.value(0)
             
-    def resetOne(self, led):
+    def reset_one(self, led):
         self.allLeds[led].value(0)
-

@@ -3,15 +3,15 @@ class Instruction:
     def __init__(self):
         self.contents = []
         
-    def loadInstruction(self, instr):
+    def load_one(self, instr):
         self.contents.append(instr)
             
-    def loadPatch(self, patch):
+    def load_patch(self, patch):
         self.contents.clear()
         for instruction in patch:
             self.contents.append(instruction)
             
-    def clearAll(self):
+    def clear(self):
         self.contents.clear()
         
     def read(self):

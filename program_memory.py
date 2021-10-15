@@ -7,7 +7,7 @@ class ProgramMemory:
     def __init__(self):
         pass
     
-    def setDefaultPatch(self, bankNo, patchNo):
+    def set_default(self, bankNo, patchNo):
         if type(bankNo) == int and type(patchNo) == int:
             tempDict = {
                 "patch": patchNo,
@@ -19,7 +19,7 @@ class ProgramMemory:
             print("Program Memory: INCORRECT TYPE FOR setDefaultPatch")
             print("patchNo: " + str(type(patchNo)) + "bankNo: " + str(type(bankNo)))
             
-    def loadDefaultPatch(self):
+    def load_default(self):
         tempDict = {
             "patch": None,
             "bank": None
@@ -29,7 +29,7 @@ class ProgramMemory:
             return data
         
         
-    def loadPatch(self, bankNo, patchNo):
+    def load_patch(self, bankNo, patchNo):
         if type(bankNo) == int and type(patchNo) == int:
             data = None
             bankNoParsed = str(bankNo)
@@ -41,7 +41,7 @@ class ProgramMemory:
         else:
             print("Program Memory: INCORRECT TYPE FOR loadPatch")
        
-    def writePatch(self, bankNo, patchNo, patchData):
+    def write_patch(self, bankNo, patchNo, patchData):
         if type(bankNo) == int and type(patchNo) == int:
             bankNoParsed = str(bankNo)
             patchNoParsed = str(patchNo)

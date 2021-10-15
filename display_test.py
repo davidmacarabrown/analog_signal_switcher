@@ -57,5 +57,3 @@ oled.show()
 
 # oled.pixel(10,10,1)
 
-oled.fill(0)
-oled.show()

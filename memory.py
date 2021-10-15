@@ -2,55 +2,54 @@ class Memory:
     
     def __init__(self):
         self.contents = []
-        self.writeLocationAddress = None
-        self.currentBank = None
-        self.currentPatch = None
-        self.inputRegister = None
+        self.write_location_address = None
+        self.current_bank = None
+        self.current_patch = None
+        self.input_register = None
         
-    def clearAll(self):
+    def clear_all(self):
         self.contents.clear()
         
-    def readInputRegister(self):
-        return this.inputRegister
+    def read_input_register(self):
+        return this.input_register
     
-    def updateInputRegister(self, newInput):
-        this.inputRegister = newInput
+    def set_input_register(self, location):
+        this.input_register = location
     
-    def clearInputRegister(self):
-        this.inputRegister = None
+    def clear_input_register(self):
+        this.input_register = None
     
-    def loadInstruction(self, instruction):
+    def load_one(self, instruction):
         if self.contents.count(instruction) == 0:
             self.contents.append(instruction)
         elif self.contents.count(instruction) == 1:
             self.contents.remove(instruction)
     
-    def loadPatch(self, instructions):
-        self.clearAll()
+    def load_patch(self, instructions):
+        self.clear_all()
         for instruction in instructions:
             self.contents.append(instruction)
             
-    def readAll(self):
+    def read_all(self):
         return self.contents
     
-    def getWriteLocation(self):
-        return self.writeLocationAddress
+    def get_write_location(self):
+        return self.write_location_address
     
-    def updateWriteLocation(self, newAdd):
-        self.writeLocationAddress = newAdd
+    def set_write_location(self, newAdd):
+        self.write_location_address = newAdd
         
-    def resetWriteLocation(self):
-        self.writeLocationAddress = None
+    def reset_write_location(self):
+        self.write_location_address = None
     
-    def updateCurrentPatch(self, newPatch):
-        self.currentPatch = newPatch
-        print("Updating current patch: " + str(newPatch))
+    def set_current_patch(self, new):
+        self.current_patch = new
         
-    def getCurrentPatch(self):
-        return self.currentPatch
+    def get_current_patch(self):
+        return self.current_patch
     
-    def updateCurrentBank(self, newBank):
-        self.currentBank = newBank
+    def set_current_bank(self, new):
+        self.current_bank = new
     
-    def getCurrentBank(self):
-        return self.currentBank
+    def get_current_bank(self):
+        return self.current_bank
