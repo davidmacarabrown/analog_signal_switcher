@@ -20,10 +20,6 @@ class ProgramMemory:
             print("patchNo: " + str(type(patchNo)) + "bankNo: " + str(type(bankNo)))
             
     def load_default(self):
-        tempDict = {
-            "patch": None,
-            "bank": None
-                }
         with open("/program/default.json", "r") as file:
             data = json.load(file)
             return data

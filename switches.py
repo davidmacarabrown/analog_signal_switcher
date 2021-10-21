@@ -13,3 +13,4 @@ class Switches:
             "write": machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN),
             "mode": machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
             } 
+

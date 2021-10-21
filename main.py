@@ -11,7 +11,7 @@ from switches import Switches
 
 #TODO:
 
-    #[DOING] work on interrupt handling for other buttons
+    # [DOING] work on interrupt handling for other buttons
     # possibly rework instruction_handler to call the read operations in program mode, move them away from the interrupt "program" mode
     # make json files for as many banks as I think there will be, or figure out checks if the bank exists, and if not create new file?
     # add functionality to mode button to cycle through banks, or add other buttons for this... other buttons probably neater, plenty of i/o pins left - "bank select" as a mode?
@@ -83,7 +83,7 @@ def write_handler(pin):
             display.refresh()
             time.sleep(1.5)
             
-            inputs.switches["write"].irq(handler = writeHandler)
+            inputs.switches["write"].irq(handler = write_handler)
             display.clear()
             display.update_mode(mode.return_value())
             display.refresh()
@@ -101,10 +101,10 @@ def interrupt_mode(pin):
             
             mode.change_mode("Program")
             instruction_register.clear()
+            inputs.switches["write"].irq(handler = None)
+            to_load = program_memory.load_patch(temp_memory.get_current_bank(), temp_memory.get_current_patch())
             
-            toLoad = program_memory.load_patch(temp_memory.get_current_bank(), temp_memory.get_current_patch())
-            
-            temp_memory.load_patch(toLoad)
+            temp_memory.load_patch(to_load)
             instruction_register.load_patch(temp_memory.read_all())
             instruction_handler()
             
@@ -113,7 +113,7 @@ def interrupt_mode(pin):
         #entering manual mode
         elif mode.return_value() == "Program":
             mode.change_mode("Manual")
-        
+            inputs.switches["write"].irq(handler = interrupt_write)
         #exiting write mode
         elif mode.return_value() == "Write":
             mode.change_mode("Manual")
@@ -142,8 +142,8 @@ def interrupt_handler(instruction_value):
             
             program_memory.set_default(current_bank, instruction_value)
             temp_memory.set_current_patch(instruction_value)
-            toLoad = program_memory.load_patch(current_bank,instruction_value)
-            temp_memory.load_patch(toLoad)
+            to_load = program_memory.load_patch(current_bank,instruction_value)
+            temp_memory.load_patch(to_load)
             instruction_register.load_patch(temp_memory.contents)
             display.update_patch(temp_memory.get_current_patch())
             instruction_handler()
@@ -203,7 +203,7 @@ inputs.switches[3].irq(trigger=machine.Pin.IRQ_RISING, handler=int_three)
 inputs.switches[4].irq(trigger=machine.Pin.IRQ_RISING, handler=int_four)
 inputs.switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=int_five)
 inputs.switches["mode"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_mode)
-inputs.switches["write"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_write)
+# inputs.switches["write"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_write)
 
 debug = False
 

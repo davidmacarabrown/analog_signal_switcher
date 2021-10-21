@@ -24,20 +24,20 @@ class Display:
         self.display.show()
         
         if self.mode:
-            self.display.text(self.mode, 0, 4)
+            self.display.text(self.mode, 0, 0)
         if self.line_one:
-            self.display.text(self.line_one, 0, 4)
+            self.display.text(self.line_one, 0, 0)
         if self.line_two:
             self.display.text(self.line_two, 0, 20)
         if self.bank:
-            self.display.text(self.bank, 0, 20)
+            self.display.text(self.bank, 0, 10)
         if self.patch:
             self.display.text(self.patch, 54, 20)
         
         self.display.show()
     
     def update_mode(self, modeIn):
-        self.mode = ">> " + str(modeIn)
+        self.mode = ">> " + str(modeIn).upper()
         
     def update_line_one(self, line):
         self.line_one = str(line)
@@ -46,10 +46,10 @@ class Display:
         self.line_two = str(line)
 
     def update_bank(self, bank):
-        self.bank = "Bank:" + str(bank)
+        self.bank = "BANK:" + str(bank)
 
     def update_patch(self, patch):
-        self.patch = "Patch:" + str(patch)
+        self.patch = "PATCH:" + str(patch)
 
 
     
