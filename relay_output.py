@@ -12,7 +12,6 @@ class RelayOutput:
                         }
         
     def latch_multi(self, patch):
-        self.reset()
         for step in patch:
             self.outputs[step].toggle()
     
