@@ -13,6 +13,3 @@ class Instruction:
             
     def clear(self):
         self.contents.clear()
-        
-    def read(self):
-        return self.contents
