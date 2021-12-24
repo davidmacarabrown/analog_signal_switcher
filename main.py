@@ -47,7 +47,10 @@ def interrupt_write(pin):
             leds.reset_all()
             leds.toggle(6)
             time.sleep(0.5)
-    inputs.switches["write"].irq(handler = write_handler)
+            inputs.switches["write"].irq(handler = write_handler)
+            
+    else:
+        inputs.switches["write"].irq(handler = interrupt_write)
             
 def write_handler(pin):
         
@@ -257,3 +260,5 @@ def start_up():
 
 if __name__  == '__main__':
     start_up()
+    
+    
