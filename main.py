@@ -39,7 +39,7 @@ def interrupt_write(pin):
     time.sleep(write_pad)
     
     if pin.value() == 1:
-        if mode.return_value() == "Manual" or "Program":
+        if mode.return_value() == "manual" or "program":
             mode.change_mode("Write")
             display.clear()
             display.update_mode(mode.return_value())
@@ -73,7 +73,7 @@ def write_handler(pin):
 
             leds.rapid_blink(6)
             temp_memory.reset_write_location()
-            mode.change_mode("Program")
+            mode.change_mode("program")
             display.clear()
             time.sleep(0.1)
             instruction_handler()
@@ -100,9 +100,9 @@ def interrupt_mode(pin):
         display.clear()
         
         #entering program mode
-        if mode.return_value() == "Manual": 
+        if mode.return_value() == "manual": 
             
-            mode.change_mode("Program")
+            mode.change_mode("program")
             instruction_register.clear()
             inputs.switches["write"].irq(handler = None)
             to_load = program_memory.load_patch(temp_memory.get_current_bank(), temp_memory.get_current_patch())
@@ -114,12 +114,12 @@ def interrupt_mode(pin):
             display.update_bank(temp_memory.get_current_bank())
         
         #entering manual mode
-        elif mode.return_value() == "Program":
-            mode.change_mode("Manual")
+        elif mode.return_value() == "program":
+            mode.change_mode("manual")
             inputs.switches["write"].irq(handler = interrupt_write)
         #exiting write mode
         elif mode.return_value() == "Write":
-            mode.change_mode("Manual")
+            mode.change_mode("manual")
             inputs.switches["write"].irq(handler = interrupt_write)
             leds.reset_all()
             temp_memory.reset_write_location()
@@ -132,12 +132,12 @@ def interrupt_mode(pin):
 
 def interrupt_handler(instruction_value):
         
-    if mode.return_value() == "Manual":
+    if mode.return_value() == "manual":
         temp_memory.load_one(instruction_value)
         instruction_register.load_one(instruction_value)
         instruction_handler()
         
-    elif mode.return_value() == "Program":
+    elif mode.return_value() == "program":
         if temp_memory.get_current_patch() == instruction_value:
             pass
         else:
@@ -218,7 +218,7 @@ def instruction_handler():
         print("Instruction Register: ", instruction_register.contents)
         print("Memory Register:      ", temp_memory.read_all())
     
-    if mode.return_value() == "Program":
+    if mode.return_value() == "program":
         leds.reset_all()
         relays.reset()
         display.clear()
