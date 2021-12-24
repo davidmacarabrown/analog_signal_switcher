@@ -11,10 +11,17 @@ class RelayOutput:
                         5: machine.Pin(14, machine.Pin.OUT)
                         }
         
-    def latch_multi(self, patch):
+    
+    def toggle_multi(self, patch):
         for step in patch:
             self.outputs[step].toggle()
-    
+            
+    def set_high(self, relay):
+        self.outputs[relay].value(1)
+        
+    def set_low(self, relay):
+        self.outputs[relay].value(0)
+            
     def reset(self):
         for output in self.outputs.values():
             output.value(0)

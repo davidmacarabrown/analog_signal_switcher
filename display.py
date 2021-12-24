@@ -21,7 +21,7 @@ class Display:
     
     def refresh(self):
         self.display.fill(0)
-        self.display.show()
+#         self.display.show()
         
         if self.mode:
             self.display.text(self.mode, 0, 0)

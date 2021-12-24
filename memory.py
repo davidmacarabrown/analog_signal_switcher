@@ -2,7 +2,7 @@ class Memory:
     
     def __init__(self):
         self.contents = []
-        self.write_location_address = None
+        self.write_location = None
         self.current_bank = None
         self.current_patch = None
         
@@ -14,17 +14,20 @@ class Memory:
             self.contents.append(instruction)
         elif self.contents.count(instruction) == 1:
             self.contents.remove(instruction)
-    
+            
     def load_patch(self, instructions):
         self.clear_all()
         for instruction in instructions:
             self.contents.append(instruction)
 
     def set_write_location(self, newAdd):
-        self.write_location_address = newAdd
+        self.write_location = newAdd
+        
+    def copy_write_location(self):
+        self.current_patch = self.write_location
         
     def reset_write_location(self):
-        self.write_location_address = None
+        self.write_location = None
     
     def set_current_patch(self, new):
         self.current_patch = new

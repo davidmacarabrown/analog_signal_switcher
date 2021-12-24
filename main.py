@@ -36,7 +36,7 @@ write_pad = 2
 # Interrupt Definitions
 def interrupt_write(pin):
     inputs.switches["write"].irq(handler = None)
-    time.sleep(write_pad)
+    time.sleep(button_pad)
     
     if pin.value() == 1:
         if mode.value == "manual" or "program":
@@ -55,30 +55,37 @@ def interrupt_write(pin):
 def write_handler(pin):
         
     inputs.switches["write"].irq(handler = None)
-    time.sleep(write_pad)
+    time.sleep(button_pad)
             
     if pin.value() == 1:
         if temp_memory.write_location:
+            
             patch_address = temp_memory.write_location
             bank_address = temp_memory.current_bank
             patch = temp_memory.contents
             
             program_memory.write_patch(bank_address, patch_address, patch)
             program_memory.set_default(bank_address, patch_address)
+            
             instruction_register.load_patch(patch)
+            
             display.clear()
             display.update_line_one(">> Saving...")
             display.update_line_two("> " + str(patch_address))
             display.refresh()
 
             leds.rapid_blink(6)
+            temp_memory.copy_write_location()
             temp_memory.reset_write_location()
+            
             mode.change_mode("program")
             display.clear()
             time.sleep(0.1)
-            instruction_handler()
             
             inputs.switches["write"].irq(handler = interrupt_write)
+            
+            instruction_handler()
+            
         else:
             display.clear()
             display.update_line_one("Select Location")
@@ -89,7 +96,7 @@ def write_handler(pin):
             inputs.switches["write"].irq(handler = write_handler)
             display.clear()
             display.update_mode(mode.value)
-            display.refresh()
+        display.refresh()
      
 def interrupt_mode(pin):
 
@@ -208,7 +215,7 @@ inputs.switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=int_five)
 inputs.switches["mode"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_mode)
 # inputs.switches["write"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_write)
 
-debug = False
+debug = True
 
 def instruction_handler():
     if debug:
@@ -219,20 +226,25 @@ def instruction_handler():
         print("Memory Register:      ", temp_memory.contents)
     
     if mode.value == "program":
-        leds.reset_all()
         display.clear()
         display.update_mode(mode.value)
         display.update_bank(temp_memory.current_bank)
         display.update_patch(temp_memory.current_patch)
         display.refresh()
-        relays.latch_multi(instruction_register.contents)
-    
-    else:
-        relays.latch_multi(instruction_register.contents)
         
-    leds.toggle_multi(instruction_register.contents)
+        for step in range(1, 6, 1):
+            if step in temp_memory.contents:
+                relays.set_high(step)
+                leds.set_high(step)
+            else:
+                relays.set_low(step)
+                leds.set_low(step)
+        
+    else:
+        relays.toggle_multi(instruction_register.contents)
+        leds.toggle_multi(instruction_register.contents)
     
-                
+    
     instruction_register.clear()
     
     if debug:
