@@ -137,85 +137,57 @@ def interrupt_mode(pin):
     display.refresh()
     inputs.switches["mode"].irq(handler = interrupt_mode)
 
-def interrupt_handler(instruction_value):
-        
-    if mode.value == "manual":
-        temp_memory.load_one(instruction_value)
-        instruction_register.load_one(instruction_value)
-        instruction_handler()
-        
-    elif mode.value == "program":
-        if temp_memory.current_patch == instruction_value:
-            pass
-        else:
-            current_bank = temp_memory.current_bank
+def interrupt_handler(pin):
+    
+    instruction_value = None
+    
+    pin.irq(handler = None)
+    time.sleep(0.1)
+    
+    if pin.value() == 1:
+        if pin:
+            for value in range(1, 6, 1):
+                if inputs.switches[value].value() == 1:
+                    instruction_value = value
             
-            program_memory.set_default(current_bank, instruction_value)
-            temp_memory.set_current_patch(instruction_value)
-            to_load = program_memory.load_patch(current_bank,instruction_value)
-            temp_memory.load_patch(to_load)
-            instruction_register.load_patch(temp_memory.contents)
-            display.update_patch(temp_memory.current_patch)
+        if mode.value == "manual":
+            temp_memory.load_one(instruction_value)
+            instruction_register.load_one(instruction_value)
             instruction_handler()
             
-    elif mode.value == "write":
-            temp_memory.set_write_location(instruction_value)
-            display.update_line_two("Location: " + str(instruction_value))
-            display.refresh()
-            leds.toggle(instruction_value)
-            time.sleep(0.3)
-            leds.toggle(instruction_value)
+        elif mode.value == "program":
+            if temp_memory.current_patch == instruction_value:
+                pass
+            else:
+                current_bank = temp_memory.current_bank
+                
+                program_memory.set_default(current_bank, instruction_value)
+                temp_memory.set_current_patch(instruction_value)
+                to_load = program_memory.load_patch(current_bank,instruction_value)
+                temp_memory.load_patch(to_load)
+                instruction_register.load_patch(temp_memory.contents)
+                display.update_patch(temp_memory.current_patch)
+                instruction_handler()
+                
+        elif mode.value == "write":
+                temp_memory.set_write_location(instruction_value)
+                display.update_line_two("Location: " + str(instruction_value))
+                display.refresh()
+                leds.toggle(instruction_value)
+                time.sleep(0.3)
+                leds.toggle(instruction_value)
+    pin.irq(handler = interrupt_handler)
 
-def int_one(pin):
-    pin_value = 1
-    pin.irq(handler = None)
-    time.sleep(0.1)
-    if pin.value() == 1:
-        interrupt_handler(pin_value)
-    pin.irq(handler = int_one)
-
-def int_two(pin):
-    pin_value = 2
-    pin.irq(handler = None)
-    time.sleep(0.1)
-    if pin.value() == 1:
-        interrupt_handler(pin_value)
-    pin.irq(handler = int_two)
-
-def int_three(pin):
-    pin_value = 3
-    pin.irq(handler = None)
-    time.sleep(0.1)
-    if pin.value() == 1:
-        interrupt_handler(pin_value)
-    pin.irq(handler = int_three)
-
-def int_four(pin):
-    pin_value = 4
-    pin.irq(handler = None)
-    time.sleep(0.1)
-    if pin.value() == 1:
-        interrupt_handler(pin_value)
-    pin.irq(handler = int_four)
-
-def int_five(pin):
-    pin_value = 5
-    pin.irq(handler = None)
-    time.sleep(0.1)
-    if pin.value() == 1:
-        interrupt_handler(pin_value)
-    pin.irq(handler = int_five)
 
 # Interrupt triggers
-inputs.switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=int_one)
-inputs.switches[2].irq(trigger=machine.Pin.IRQ_RISING, handler=int_two)
-inputs.switches[3].irq(trigger=machine.Pin.IRQ_RISING, handler=int_three)
-inputs.switches[4].irq(trigger=machine.Pin.IRQ_RISING, handler=int_four)
-inputs.switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=int_five)
+inputs.switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+inputs.switches[2].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+inputs.switches[3].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+inputs.switches[4].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+inputs.switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
 inputs.switches["mode"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_mode)
-# inputs.switches["write"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_write)
 
-debug = True
+debug = False
 
 def instruction_handler():
     if debug:
