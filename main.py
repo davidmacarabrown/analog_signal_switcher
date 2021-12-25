@@ -120,12 +120,12 @@ def interrupt_mode(pin):
             
             display.update_bank(temp_memory.current_bank)
         
-        #entering manual mode
+
         elif mode.value == "program":
             mode.change_mode("manual")
             inputs.switches["write"].irq(handler = interrupt_write)
-        #exiting write mode
-        elif mode.value == "write":
+            
+        else:
             mode.change_mode("manual")
             inputs.switches["write"].irq(handler = interrupt_write)
             leds.reset_all()
@@ -139,45 +139,40 @@ def interrupt_mode(pin):
 
 def interrupt_handler(pin):
     
-    instruction_value = None
-    
     pin.irq(handler = None)
     time.sleep(0.1)
     
     if pin.value() == 1:
-        if pin:
-            for value in range(1, 6, 1):
-                if inputs.switches[value].value() == 1:
-                    instruction_value = value
-            
-        if mode.value == "manual":
-            temp_memory.load_one(instruction_value)
-            instruction_register.load_one(instruction_value)
-            instruction_handler()
-            
-        elif mode.value == "program":
-            if temp_memory.current_patch == instruction_value:
-                pass
-            else:
-                current_bank = temp_memory.current_bank
+        for instruction_value in range(1, 6, 1):
+            if inputs.switches[instruction_value].value() == 1:
                 
-                program_memory.set_default(current_bank, instruction_value)
-                temp_memory.set_current_patch(instruction_value)
-                to_load = program_memory.load_patch(current_bank,instruction_value)
-                temp_memory.load_patch(to_load)
-                instruction_register.load_patch(temp_memory.contents)
-                display.update_patch(temp_memory.current_patch)
-                instruction_handler()
+                if mode.value == "manual":
+                    temp_memory.load_one(instruction_value)
+                    instruction_register.load_one(instruction_value)
+                    instruction_handler() 
+                elif mode.value == "program":
+                    if temp_memory.current_patch == instruction_value:
+                        pass
+                    else:
+                        program_memory.set_default(temp_memory.current_bank, instruction_value)
+                        temp_memory.set_current_patch(instruction_value)
+                        to_load = program_memory.load_patch(temp_memory.current_bank,instruction_value)
+                        temp_memory.load_patch(to_load)
+                        instruction_register.load_patch(temp_memory.contents)
+                        display.update_patch(temp_memory.current_patch)
+                        instruction_handler()
+                        
+                else:
+                    temp_memory.set_write_location(instruction_value)
+                    display.update_line_two("Location: " + str(instruction_value))
+                    display.refresh()
+                    leds.toggle(instruction_value)
+                    time.sleep(0.3)
+                    leds.toggle(instruction_value)
+                    
+                break
                 
-        elif mode.value == "write":
-                temp_memory.set_write_location(instruction_value)
-                display.update_line_two("Location: " + str(instruction_value))
-                display.refresh()
-                leds.toggle(instruction_value)
-                time.sleep(0.3)
-                leds.toggle(instruction_value)
     pin.irq(handler = interrupt_handler)
-
 
 # Interrupt triggers
 inputs.switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
