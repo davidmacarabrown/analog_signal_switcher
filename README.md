@@ -23,5 +23,8 @@ Concerning data storage, there are libraries available for interfacing with SD C
 - MIDI functionality for controlling or being controlled by external units (would require large rework of the program memory to include MIDI data)
 - Browsing and editing/deleting banks more quickly using buttons
 - Enabling/Disabling features such as delay tails (would require summing amplifiers to be added to every loop and complicate the switching)
+- Switchable buffer circuitry
+- Built-in Tuner functionality
+- Amp Switching Output
 
 Both hardware and code are still in prototyping stage with the completed code, example build instructions and full documentation to follow.

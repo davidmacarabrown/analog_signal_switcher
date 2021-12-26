@@ -1,10 +1,14 @@
 class Memory:
     
     def __init__(self):
+        self.mode = "program"
         self.contents = []
         self.write_location = None
         self.current_bank = None
         self.current_patch = None
+        
+    def change_mode(self, newMode):
+        self.mode = newMode
         
     def clear_all(self):
         self.contents.clear()
