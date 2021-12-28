@@ -49,6 +49,15 @@ class Display:
 
     def update_patch(self, patch):
         self.patch = "PATCH:" + str(patch)
+        
+    def save_message(self, location):
+        self.clear()
+        self.update_line_one(">> Saving...")
+        self.update_line_two("> " + str(location))
+        self.refresh()
 
-
-    
+    def write_warning(self):
+        self.clear()
+        self.line_one = "Select Location"
+        self.line_two = "Mode > Exit"
+        self.refresh()
