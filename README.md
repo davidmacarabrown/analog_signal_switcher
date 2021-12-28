@@ -20,7 +20,6 @@ Concerning data storage, there are libraries available for interfacing with SD C
 
 ## Planned Features
 - Menu system for editing banks, deleting patches...
-- Bank System and means to navigate banks
 - MIDI functionality for controlling or being controlled by external units (would require large rework of the program memory to include MIDI data)
 - Browsing and editing/deleting banks more quickly using buttons
 - Enabling/Disabling features such as delay tails (would require summing amplifiers to be added to every loop and complicate the switching)
