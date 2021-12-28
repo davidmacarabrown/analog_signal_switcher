@@ -1,39 +1,38 @@
 import machine
 import uos
 import json
+
+path = "/program/patch.json"
+default = "/program/default.json"
     
-def set_default(bankNo, patchNo):
+def set_default(bank_no, patch_no):
     
-    tempDict = {
-        "patch": patchNo,
-        "bank": bankNo
+    temp = {
+        "patch": patch_no,
+        "bank": bank_no
             }
-    with open("/program/default.json", "w") as file:
-        json.dump(tempDict, file)
+    with open(default, "w") as file:
+        json.dump(temp, file)
         
-def load_default():
+def read_default():
     
-    with open("/program/default.json", "r") as file:
+    with open(default, "r") as file:
         data = json.load(file)
         return data
-    
-def load_patch(bankNo, patchNo):
-    
-    bankNo, patchNo, data = str(bankNo), str(patchNo), None
-    
-    with open(f"/program/bank{bankNo}.json", "r") as file:
-        data = json.load(file)
-    patch = data[patchNo]
-    
-    return patch
    
-def write_patch(bankNo, patchNo, patchData):
+def write_patch(bank_no, patch_no, patch_data):
     
-    bankNo, patchNo, data = str(bankNo), str(patchNo), None
+    bank_no, patch_no, data = str(bank_no), str(patch_no), None
     
-    with open(f"/program/bank{bankNo}.json", "r") as file:
+    with open(path, "r") as file:
         data = json.load(file)
         
-    data[patchNo] = patchData
-    with open(f"/program/bank{bankNo}.json", "w") as write:
+    data[bank_no][patch_no] = patch_data
+    
+    with open(path, "w") as write:
         json.dump(data, write)
+    
+def read_bank(bank):
+    with open(path, "r") as file:
+        data = json.load(file)
+        return data[str(bank)]

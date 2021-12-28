@@ -1,5 +1,6 @@
 from machine import Pin, I2C
 from ssd1306 import SSD1306_I2C
+import time
 
 i2c = I2C(1, sda=Pin(26), scl=Pin(27), freq=400000)
 

@@ -2,7 +2,8 @@ class Memory:
     
     def __init__(self):
         self.mode = "program"
-        self.contents = []
+        self.patch = []
+        self.bank = {}
         self.write_location = None
         self.current_bank = None
         self.current_patch = None
@@ -11,18 +12,22 @@ class Memory:
         self.mode = newMode
         
     def clear_all(self):
-        self.contents.clear()
+        self.patch.clear()
     
     def load_one(self, instruction):
-        if self.contents.count(instruction) == 0:
-            self.contents.append(instruction)
-        elif self.contents.count(instruction) == 1:
-            self.contents.remove(instruction)
+        if self.patch.count(instruction) == 0:
+            self.patch.append(instruction)
+        elif self.patch.count(instruction) == 1:
+            self.patch.remove(instruction)
             
-    def load_patch(self, instructions):
-        self.clear_all()
-        for instruction in instructions:
-            self.contents.append(instruction)
+    def load_patch(self, patch_address):
+        self.patch = self.bank[str(patch_address)]
+        
+    def load_current_patch(self):
+        self.patch = self.bank[str(self.current_patch)]
+    
+    def load_bank(self, bank):
+        self.bank = bank
 
     def set_write_location(self, newAdd):
         self.write_location = newAdd
@@ -38,3 +43,13 @@ class Memory:
     
     def set_current_bank(self, new):
         self.current_bank = new
+        
+    def increment_bank(self):
+        if self.current_bank < 5:
+            self.current_bank += 1
+            self.current_patch = 1
+        
+    def decrement_bank(self):
+        if self.current_bank > 1:
+            self.current_bank -= 1
+            self.current_patch = 1

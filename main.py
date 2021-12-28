@@ -51,13 +51,12 @@ def write_handler(pin):
     if pin.value() == 1:
         if t_mem.write_location:
             patch_add, bank_add, = t_mem.write_location, t_mem.current_bank
-            patch = t_mem.contents
+            patch = t_mem.patch
             
             p_mem.write_patch(bank_add, patch_add, patch)
             p_mem.set_default(bank_add, patch_add)
             
             _thread.start_new_thread(leds.rapid_blink, (6,))
-            
             display.save_message(t_mem.write_location)
             time.sleep(0.5)
             
@@ -90,8 +89,7 @@ def interrupt_mode(pin):
         if t_mem.mode == "manual": 
             t_mem.change_mode("program")
             switches["write"].irq(handler = None)
-            to_load = p_mem.load_patch(t_mem.current_bank, t_mem.current_patch)
-            t_mem.load_patch(to_load)
+            t_mem.load_patch(t_mem.current_patch)
             instruction_handler()
         
         elif t_mem.mode == "program":
@@ -111,33 +109,55 @@ def interrupt_mode(pin):
 
 def interrupt_handler(pin):
     
-    pin.irq(handler = None)
-    time.sleep(0.1)
+    switches[1].irq(handler=None)
+    switches[2].irq(handler=None)
+    switches[3].irq(handler=None)
+    switches[4].irq(handler=None)
+    switches[5].irq(handler=None)
     
+    time.sleep(0.1)
+
     if pin.value() == 1:
-        for i in range(1, 6, 1):
-            if switches[i].value() == 1:  
-                if t_mem.mode == "manual":
-                    instruction_handler(i) 
-                elif t_mem.mode == "program":
-                    if t_mem.current_patch == i:
-                        pass
+        
+        if switches[2].value() == 1 and switches[1].value() == 1:
+            t_mem.decrement_bank()
+            t_mem.load_bank(p_mem.read_bank(t_mem.current_bank))
+            t_mem.load_current_patch()
+            instruction_handler()
+            
+        elif switches[2].value() == 1 and switches[3].value() == 1:
+            t_mem.increment_bank()
+            t_mem.load_bank(p_mem.read_bank(t_mem.current_bank))
+            t_mem.load_current_patch()
+            instruction_handler()
+            
+        else:
+            for i in range(1, 6, 1):
+                if switches[i].value() == 1:  
+                    if t_mem.mode == "manual":
+                        instruction_handler(i) 
+                    elif t_mem.mode == "program":
+                        if t_mem.current_patch == i:
+                            pass
+                        else:
+                            p_mem.set_default(t_mem.current_bank, i)
+                            t_mem.set_current_patch(i)
+                            t_mem.load_patch(i)
+                            instruction_handler()    
                     else:
-                        p_mem.set_default(t_mem.current_bank, i)
-                        t_mem.set_current_patch(i)
-                        to_load = p_mem.load_patch(t_mem.current_bank,i)
-                        t_mem.load_patch(to_load)
-                        instruction_handler()    
-                else:
-                    t_mem.set_write_location(i)
-                    display.update_line_two("Location: " + str(i))
-                    display.refresh()
-                    leds.toggle(i)
-                    time.sleep(0.3)
-                    leds.toggle(i)  
-                break
+                        t_mem.set_write_location(i)
+                        display.update_line_two("Location: " + str(i))
+                        display.refresh()
+                        leds.toggle(i)
+                        time.sleep(0.3)
+                        leds.toggle(i)  
+                    break
                 
-    pin.irq(handler = interrupt_handler)
+    switches[1].irq(handler=interrupt_handler)
+    switches[2].irq(handler=interrupt_handler)
+    switches[3].irq(handler=interrupt_handler)
+    switches[4].irq(handler=interrupt_handler)
+    switches[5].irq(handler=interrupt_handler)
 
 switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
 switches[2].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
@@ -155,8 +175,7 @@ def instruction_handler(single= None):
         print("Executing in ", t_mem.mode, " mode")
         print("--------------------------------")
         print("Instruction Register: ", i_reg.contents)
-        print("Memory Register:      ", t_mem.contents)
-    
+        print("Memory Register:      ", t_mem.patch)
     
     if single:
         t_mem.load_one(single)
@@ -166,14 +185,12 @@ def instruction_handler(single= None):
     else:
         display.clear()
         display.update_mode(t_mem.mode)
-        
-        if t_mem.mode == "program":
-            display.update_bank(t_mem.current_bank)
-            display.update_patch(t_mem.current_patch)
+        display.update_bank(t_mem.current_bank)
+        display.update_patch(t_mem.current_patch)
         display.refresh()
         
         for step in range(1, 6, 1):
-            if step in t_mem.contents:
+            if step in t_mem.patch:
                 relays.set_high(step)
                 leds.set_high(step)
             else:
@@ -183,7 +200,7 @@ def instruction_handler(single= None):
     if debug:
         print("--------------------------------")
         print("Instruction Register: ", i_reg.contents)
-        print("Memory Register:      ", t_mem.contents)
+        print("Memory Register:      ", t_mem.patch)
         
 def start_up():
     
@@ -192,16 +209,13 @@ def start_up():
     display.clear()
     display.update_line_one("Starting...")
     display.refresh()
-    time.sleep(1)
     
-    default_data = p_mem.load_default()
-    default_bank = default_data["bank"]
-    default_patch = default_data["patch"]
-    start_patch = p_mem.load_patch(default_bank, default_patch)
+    default_location = p_mem.read_default()
+    t_mem.load_bank(p_mem.read_bank(default_location["bank"]))
     
-    t_mem.load_patch(start_patch)
-    t_mem.set_current_patch(default_patch)
-    t_mem.set_current_bank(default_bank)
+    t_mem.set_current_bank(default_location["bank"])
+    t_mem.set_current_patch(default_location["patch"])
+
     instruction_handler()
 
 if __name__  == '__main__':
