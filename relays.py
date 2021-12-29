@@ -1,11 +1,11 @@
 import machine
 
 outputs = {
-            1: machine.Pin(10, machine.Pin.OUT),
-            2: machine.Pin(11, machine.Pin.OUT),
-            3: machine.Pin(12, machine.Pin.OUT),
-            4: machine.Pin(13, machine.Pin.OUT),
-            5: machine.Pin(14, machine.Pin.OUT)
+            1: machine.Pin(11, machine.Pin.OUT),
+            2: machine.Pin(12, machine.Pin.OUT),
+            3: machine.Pin(13, machine.Pin.OUT),
+            4: machine.Pin(14, machine.Pin.OUT),
+            5: machine.Pin(15, machine.Pin.OUT)
             }
         
 def toggle_multi(patch):

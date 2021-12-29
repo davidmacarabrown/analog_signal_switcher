@@ -11,21 +11,26 @@ import indicators as leds
 from switches import switches
 import relays
 
-#TODO:
 
-    # [DOING] work on interrupt handling for other buttons
-    # possibly rework instruction_handler to call the read operations in program mode, move them away from the interrupt "program" mode
-    # make json files for as many banks as I think there will be, or figure out checks if the bank exists, and if not create new file?
-    # add functionality to mode button to cycle through banks, or add other buttons for this... other buttons probably neater, plenty of i/o pins left - "bank select" as a mode?
-    # [DOING] work on display functionality
-    # basically debug anything that breaks which will probably be... everything???
+
+"""
+
+INFO:
+    + top segment of display is 16px
+    + bottom segment is 48px
+
+TODO:
+
+    + basically debug anything that breaks which will probably be... everything???
+    
+"""
 
 t_mem = Memory()
 display = Display()
 
 button_pad, write_pad = 0.1, 2
 
-def interrupt_write(pin):
+def write_enable(pin):
     
     switches["write"].irq(handler = None)
     time.sleep(button_pad)
@@ -38,34 +43,28 @@ def interrupt_write(pin):
             display.refresh()
             leds.reset_all()
             leds.toggle(6)
-            time.sleep(0.5)
             switches["write"].irq(handler = write_handler) 
     else:
-        switches["write"].irq(handler = interrupt_write)
+        switches["write"].irq(handler = write_enable)
             
 def write_handler(pin):
         
     switches["write"].irq(handler = None)
     time.sleep(write_pad)
             
-    if pin.value() == 1:
+    if pin.value():
         if t_mem.write_location:
-            patch_add, bank_add, = t_mem.write_location, t_mem.current_bank
-            patch = t_mem.patch
-            
-            p_mem.write_patch(bank_add, patch_add, patch)
-            p_mem.set_default(bank_add, patch_add)
+            patch_add, bank_add, patch = t_mem.write_location, t_mem.current_bank, t_mem.patch
             
             _thread.start_new_thread(leds.rapid_blink, (6,))
             display.save_message(t_mem.write_location)
-            time.sleep(0.5)
-            
+            p_mem.write_patch(bank_add, patch_add, patch)
+            p_mem.set_default(bank_add, patch_add)            
             t_mem.copy_write_location()
             t_mem.reset_write_location()
             t_mem.change_mode("program")
             display.clear()
-            time.sleep(0.1)
-            switches["write"].irq(handler = interrupt_write)
+            switches["write"].irq(handler = write_enable)
             instruction_handler()
         else:
             display.write_warning()
@@ -85,110 +84,105 @@ def interrupt_mode(pin):
     
     if pin.value() == 1:
         display.clear()
-        
         if t_mem.mode == "manual": 
             t_mem.change_mode("program")
             switches["write"].irq(handler = None)
             t_mem.load_patch(t_mem.current_patch)
             instruction_handler()
-        
         elif t_mem.mode == "program":
             t_mem.change_mode("manual")
-            switches["write"].irq(handler = interrupt_write)
-            
+            switches["write"].irq(handler = write_enable)
         else:
             t_mem.change_mode("manual")
             print("hello mate")
-            switches["write"].irq(handler = interrupt_write)
+            switches["write"].irq(handler = write_enable)
             t_mem.reset_write_location()
             instruction_handler()
             
     display.update_mode(t_mem.mode)
     display.refresh()
     switches["mode"].irq(handler = interrupt_mode)
-
-def interrupt_handler(pin):
     
-    switches[1].irq(handler=None)
-    switches[2].irq(handler=None)
-    switches[3].irq(handler=None)
-    switches[4].irq(handler=None)
-    switches[5].irq(handler=None)
-    
-    time.sleep(0.1)
-
-    if pin.value() == 1:
-        
-        if switches[2].value() == 1 and switches[1].value() == 1:
-            t_mem.decrement_bank()
-            t_mem.load_bank(p_mem.read_bank(t_mem.current_bank))
-            t_mem.load_current_patch()
-            instruction_handler()
-            
-        elif switches[2].value() == 1 and switches[3].value() == 1:
-            t_mem.increment_bank()
-            t_mem.load_bank(p_mem.read_bank(t_mem.current_bank))
-            t_mem.load_current_patch()
-            instruction_handler()
-            
-        else:
-            for i in range(1, 6, 1):
-                if switches[i].value() == 1:  
-                    if t_mem.mode == "manual":
-                        instruction_handler(i) 
-                    elif t_mem.mode == "program":
-                        if t_mem.current_patch == i:
-                            pass
-                        else:
-                            p_mem.set_default(t_mem.current_bank, i)
-                            t_mem.set_current_patch(i)
-                            t_mem.load_patch(i)
-                            instruction_handler()    
-                    else:
-                        t_mem.set_write_location(i)
-                        display.update_line_two("Location: " + str(i))
-                        display.refresh()
-                        leds.toggle(i)
-                        time.sleep(0.3)
-                        leds.toggle(i)  
-                    break
-                
+def enable_irq():
     switches[1].irq(handler=interrupt_handler)
     switches[2].irq(handler=interrupt_handler)
     switches[3].irq(handler=interrupt_handler)
     switches[4].irq(handler=interrupt_handler)
     switches[5].irq(handler=interrupt_handler)
+    return
+    
+def disable_irq():
+    switches[1].irq(handler=None)
+    switches[2].irq(handler=None)
+    switches[3].irq(handler=None)
+    switches[4].irq(handler=None)
+    switches[5].irq(handler=None)
+    return
 
-switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
-switches[2].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
-switches[3].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
-switches[4].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
-switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
-switches["mode"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_mode)
+def bank_change():
+    t_mem.load_bank(p_mem.read_bank(t_mem.current_bank))
+    display.update_bank(t_mem.current_bank)
+    if t_mem.current_bank != t_mem.active_bank and t_mem.current_patch == t_mem.active_patch:
+        display.update_patch("-")
+        display.refresh()
+    else:
+        t_mem.load_current_patch()
+        instruction_handler()
+
+def interrupt_handler(pin):
+    
+    _thread.start_new_thread(disable_irq, ())
+    time.sleep(0.1)
+
+    if pin.value():
+        if switches[2].value():
+            if switches[1].value():
+                _thread.start_new_thread(enable_irq, ())
+                t_mem.decrement_bank()
+                bank_change()
+                return
+            
+            elif switches[3].value():
+                _thread.start_new_thread(enable_irq, ())
+                t_mem.increment_bank()
+                bank_change()
+                return
+
+        for i in range(1, 6, 1):
+            if switches[i].value():  
+                if t_mem.mode == "manual":
+                    instruction_handler(i) 
+                elif t_mem.mode == "program":
+                    p_mem.set_default(t_mem.current_bank, i)
+                    t_mem.set_current_patch(i)
+                    t_mem.load_patch(i)
+                    instruction_handler()    
+                else:
+                    t_mem.set_write_location(i)
+                    display.update_line_two(f"Location: {str(i)}")
+                    display.refresh()
+                    leds.toggle(i)
+                    time.sleep(0.2)
+                    leds.toggle(i)  
+                break
+                
+    enable_irq()
 
 debug = False
-
 def instruction_handler(single= None):
     
     if debug:
         print("--------------------------------")
-        print("Executing in ", t_mem.mode, " mode")
+        print(f"Executing in {t_mem.mode} mode")
         print("--------------------------------")
-        print("Instruction Register: ", i_reg.contents)
-        print("Memory Register:      ", t_mem.patch)
+        print(f"Patch {t_mem.current_patch} Contents:       {t_mem.patch}")
+        print(f"Bank {t_mem.current_bank} Contents:        {t_mem.bank}")
     
     if single:
         t_mem.load_one(single)
         leds.toggle_one(single)
         relays.toggle_one(single)
-        
     else:
-        display.clear()
-        display.update_mode(t_mem.mode)
-        display.update_bank(t_mem.current_bank)
-        display.update_patch(t_mem.current_patch)
-        display.refresh()
-        
         for step in range(1, 6, 1):
             if step in t_mem.patch:
                 relays.set_high(step)
@@ -196,30 +190,42 @@ def instruction_handler(single= None):
             else:
                 relays.set_low(step)
                 leds.set_low(step)
-    
-    if debug:
-        print("--------------------------------")
-        print("Instruction Register: ", i_reg.contents)
-        print("Memory Register:      ", t_mem.patch)
+                
+        display.clear()
+        display.update_mode(t_mem.mode)
+        display.update_bank(t_mem.current_bank)
+        display.update_patch(t_mem.current_patch)
+        display.refresh()
+        p_mem.set_default(t_mem.current_bank, t_mem.current_patch)
+        t_mem.set_active()
         
-def start_up():
+def main():
+    global debug
+    if switches["write"].value():
+        debug = True
+        time.sleep(1)
     
     leds.reset_all()
     relays.reset()
     display.clear()
-    display.update_line_one("Starting...")
     display.refresh()
-    
     default_location = p_mem.read_default()
     t_mem.load_bank(p_mem.read_bank(default_location["bank"]))
-    
     t_mem.set_current_bank(default_location["bank"])
     t_mem.set_current_patch(default_location["patch"])
+    t_mem.load_current_patch()
 
     instruction_handler()
-
+    
+    switches[1].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+    switches[2].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+    switches[3].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+    switches[4].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+    switches[5].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_handler)
+    switches["mode"].irq(trigger=machine.Pin.IRQ_RISING, handler=interrupt_mode)
+    
 if __name__  == '__main__':
     gc.enable()
-    start_up()
+    main()
     
     

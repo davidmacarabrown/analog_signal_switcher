@@ -1,5 +1,6 @@
 import time
 import machine
+import _thread
 
 
 indicators = {
@@ -32,13 +33,13 @@ def toggle_one(led):
     indicators[led].toggle()
         
 def rapid_blink(led):
-    indicators[led].value(0)
     time.sleep(0.05)
     i = 0
-    while i < 14:
+    while i < 15:
         indicators[led].toggle()
         time.sleep(0.05)
-        i += 1
+        i += 1 
+    return
 
 def single_blink(led):
     indicators[led].value(0)

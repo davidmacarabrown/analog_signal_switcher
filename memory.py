@@ -4,9 +4,11 @@ class Memory:
         self.mode = "program"
         self.patch = []
         self.bank = {}
-        self.write_location = None
+        self.active_patch = None
+        self.active_bank = None
         self.current_bank = None
         self.current_patch = None
+        self.write_location = None
         
     def change_mode(self, newMode):
         self.mode = newMode
@@ -19,6 +21,10 @@ class Memory:
             self.patch.append(instruction)
         elif self.patch.count(instruction) == 1:
             self.patch.remove(instruction)
+            
+    def set_active(self):
+        self.active_bank = self.current_bank
+        self.active_patch = self.current_patch
             
     def load_patch(self, patch_address):
         self.patch = self.bank[str(patch_address)]
@@ -47,9 +53,7 @@ class Memory:
     def increment_bank(self):
         if self.current_bank < 5:
             self.current_bank += 1
-            self.current_patch = 1
         
     def decrement_bank(self):
         if self.current_bank > 1:
             self.current_bank -= 1
-            self.current_patch = 1
