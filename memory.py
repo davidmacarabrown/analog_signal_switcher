@@ -1,13 +1,13 @@
 class Memory:
     
     def __init__(self):
-        self.mode = "program"
+        self.mode = None
         self.patch = []
         self.bank = {}
         self.active_patch = None
         self.active_bank = None
-        self.current_bank = None
-        self.current_patch = None
+        self.selected_bank = None
+        self.selected_patch = None
         self.write_location = None
         
     def change_mode(self, newMode):
@@ -23,14 +23,14 @@ class Memory:
             self.patch.remove(instruction)
             
     def set_active(self):
-        self.active_bank = self.current_bank
-        self.active_patch = self.current_patch
+        self.active_bank = self.selected_bank
+        self.active_patch = self.selected_patch
             
     def load_patch(self, patch_address):
         self.patch = self.bank[str(patch_address)]
         
-    def load_current_patch(self):
-        self.patch = self.bank[str(self.current_patch)]
+    def load_selected_patch(self):
+        self.patch = self.bank[str(self.selected_patch)]
     
     def load_bank(self, bank):
         self.bank = bank
@@ -39,21 +39,21 @@ class Memory:
         self.write_location = newAdd
         
     def copy_write_location(self):
-        self.current_patch = self.write_location
+        self.selected_patch = self.write_location
         
     def reset_write_location(self):
         self.write_location = None
     
-    def set_current_patch(self, new):
-        self.current_patch = new
+    def set_selected_patch(self, new):
+        self.selected_patch = new
     
-    def set_current_bank(self, new):
-        self.current_bank = new
+    def set_selected_bank(self, new):
+        self.selected_bank = new
         
     def increment_bank(self):
-        if self.current_bank < 5:
-            self.current_bank += 1
+        if self.selected_bank < 5:
+            self.selected_bank += 1
         
     def decrement_bank(self):
-        if self.current_bank > 1:
-            self.current_bank -= 1
+        if self.selected_bank > 1:
+            self.selected_bank -= 1

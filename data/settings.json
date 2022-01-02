@@ -1,0 +1,17 @@
+{ 
+"settings": [
+             {
+              "parameter": "startup-mode",
+              "options": [
+                            {
+                            "name": "program",
+                            "status": true
+                            },
+                            {
+                            "name": "manual",
+                            "status": false
+                            }
+                         ]
+              }
+             ]
+}

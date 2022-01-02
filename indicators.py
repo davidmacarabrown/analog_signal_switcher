@@ -38,7 +38,7 @@ def rapid_blink(led):
     while i < 15:
         indicators[led].toggle()
         time.sleep(0.05)
-        i += 1 
+        i += 1
     return
 
 def single_blink(led):
@@ -51,6 +51,3 @@ def reset_all():
     for led in indicators.values():
         led.value(0)
         
-def reset_one(led):
-    indicators[led].value(0)
-

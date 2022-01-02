@@ -4,6 +4,7 @@ import json
 
 path = "/program/patch.json"
 default = "/program/default.json"
+settings = "/settings/settings.json"
     
 def set_default(bank_no, patch_no):
     
@@ -29,8 +30,8 @@ def write_patch(bank_no, patch_no, patch_data):
         
     data[bank_no][patch_no] = patch_data
     
-    with open(path, "w") as write:
-        json.dump(data, write)
+    with open(path, "w") as file:
+        json.dump(data, file)
     
 def read_bank(bank):
     with open(path, "r") as file:
