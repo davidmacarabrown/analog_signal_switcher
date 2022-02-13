@@ -1,17 +1,15 @@
-{ 
-"settings": [
-             {
-              "parameter": "startup-mode",
-              "options": [
+{
+"startup-mode": {
+                    "options": [
                             {
-                            "name": "program",
-                            "status": true
+                            "option": 1,
+                            "status": false
                             },
                             {
-                            "name": "manual",
-                            "status": false
+                            "option": 2,
+                            "status": true
                             }
-                         ]
-              }
-             ]
+                  ]
+        }
+
 }
