@@ -2,11 +2,11 @@
 "startup-mode": {
                     "options": [
                             {
-                            "option": 1,
+                            "option": "manual",
                             "status": false
                             },
                             {
-                            "option": 2,
+                            "option": "program",
                             "status": true
                             }
                   ]

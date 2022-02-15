@@ -7,6 +7,6 @@ switches ={
             3: machine.Pin(18, machine.Pin.IN, Pin.PULL_DOWN),
             4: machine.Pin(17, machine.Pin.IN, Pin.PULL_DOWN),
             5: machine.Pin(16, machine.Pin.IN, Pin.PULL_DOWN),
-            "write": machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN),
-            "mode": machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
-            } 
+            "w": machine.Pin(22, machine.Pin.IN, Pin.PULL_DOWN),
+            "m": machine.Pin(21, machine.Pin.IN, Pin.PULL_DOWN)
+            }
